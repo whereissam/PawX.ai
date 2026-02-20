@@ -8,9 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { TagBadge } from "@/components/tag-badge"
 import { Button } from "@/components/ui/button"
-import { Users, UserPlus, MapPin, Calendar, Globe } from "lucide-react"
-import { tweets } from "@/data/tweets"
-import type { KOL } from "@/types"
+import { Users, UserPlus, MapPin, Globe, Eye } from "lucide-react"
+import { tweetResponses } from "@/data/tweets"
+import type { KolUser } from "@/types"
 
 function formatNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
@@ -28,7 +28,7 @@ function timeAgo(timestamp: string): string {
 }
 
 interface KolDetailDrawerProps {
-  kol: KOL | null
+  kol: KolUser | null
   open: boolean
   onOpenChange: (open: boolean) => void
   isSelected: boolean
@@ -44,7 +44,9 @@ export function KolDetailDrawer({
 }: KolDetailDrawerProps) {
   if (!kol) return null
 
-  const kolTweets = tweets.filter((t) => t.kolId === kol.id)
+  const kolTweets = tweetResponses
+    .filter((r) => r.user.id === kol.id)
+    .map((r) => r.tweet)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -52,13 +54,13 @@ export function KolDetailDrawer({
         <SheetHeader>
           <div className="flex items-start gap-3 sm:gap-4">
             <Avatar className="h-12 w-12 sm:h-16 sm:w-16">
-              <AvatarImage src={kol.avatar} alt={kol.displayName} />
-              <AvatarFallback>{kol.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`} alt={kol.name} />
+              <AvatarFallback>{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <SheetTitle className="text-base sm:text-lg truncate">{kol.displayName}</SheetTitle>
-                {kol.verified && (
+                <SheetTitle className="text-base sm:text-lg truncate">{kol.name}</SheetTitle>
+                {kol.isKol && (
                   <svg className="h-4 w-4 text-blue-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path
                       fillRule="evenodd"
@@ -68,23 +70,23 @@ export function KolDetailDrawer({
                   </svg>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">{kol.handle}</p>
+              <p className="text-sm text-muted-foreground">@{kol.screenName}</p>
             </div>
           </div>
         </SheetHeader>
 
         <div className="mt-4 space-y-4">
-          <p className="text-sm">{kol.bio}</p>
+          <p className="text-sm">{kol.description}</p>
 
           <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              <strong className="text-foreground">{formatNumber(kol.followers)}</strong>
+              <strong className="text-foreground">{formatNumber(kol.followersCount)}</strong>
               <span className="hidden sm:inline">followers</span>
             </span>
             <span className="flex items-center gap-1">
               <UserPlus className="h-4 w-4" />
-              <strong className="text-foreground">{formatNumber(kol.following)}</strong>
+              <strong className="text-foreground">{formatNumber(kol.friendsCount)}</strong>
               <span className="hidden sm:inline">following</span>
             </span>
           </div>
@@ -96,10 +98,6 @@ export function KolDetailDrawer({
                 {kol.location}
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              Joined {kol.joinedDate}
-            </span>
             {kol.website && (
               <a
                 href={kol.website}
@@ -116,28 +114,10 @@ export function KolDetailDrawer({
           <Separator />
 
           <div className="space-y-2">
-            <h4 className="text-sm font-medium">Languages</h4>
+            <h4 className="text-sm font-medium">Tags</h4>
             <div className="flex flex-wrap gap-1">
-              {kol.languages.map((lang) => (
-                <TagBadge key={lang} tag={lang} type="language" />
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Ecosystems</h4>
-            <div className="flex flex-wrap gap-1">
-              {kol.ecosystems.map((eco) => (
-                <TagBadge key={eco} tag={eco} type="ecosystem" />
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Type</h4>
-            <div className="flex flex-wrap gap-1">
-              {kol.userTypes.map((type) => (
-                <TagBadge key={type} tag={type} type="userType" />
+              {kol.tags.map((tag) => (
+                <TagBadge key={tag} tag={tag} />
               ))}
             </div>
           </div>
@@ -159,12 +139,16 @@ export function KolDetailDrawer({
                 <h4 className="text-sm font-medium">Recent Tweets</h4>
                 {kolTweets.map((tweet) => (
                   <div key={tweet.id} className="p-2.5 sm:p-3 bg-muted rounded-lg space-y-2">
-                    <p className="text-sm">{tweet.content}</p>
+                    <p className="text-sm">{tweet.text}</p>
                     <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
-                      <span>{formatNumber(tweet.likes)} likes</span>
-                      <span>{formatNumber(tweet.retweets)} RT</span>
-                      <span>{formatNumber(tweet.replies)} replies</span>
-                      <span className="sm:ml-auto">{timeAgo(tweet.timestamp)}</span>
+                      <span>{formatNumber(tweet.favoriteCount)} likes</span>
+                      <span>{formatNumber(tweet.retweetCount)} RT</span>
+                      <span>{formatNumber(tweet.replyCount)} replies</span>
+                      <span className="flex items-center gap-0.5">
+                        <Eye className="h-3 w-3" />
+                        {formatNumber(tweet.viewCount)}
+                      </span>
+                      <span className="sm:ml-auto">{timeAgo(tweet.createdAt)}</span>
                     </div>
                   </div>
                 ))}

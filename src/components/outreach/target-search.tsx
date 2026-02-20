@@ -1,24 +1,20 @@
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { LANGUAGE_TAGS, ECOSYSTEM_TAGS, USER_TYPE_TAGS } from "@/data/tags"
+import { KOL_TAGS } from "@/data/tags"
 import { Search } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { FilterState, LanguageTag, EcosystemTag, UserTypeTag } from "@/types"
+import type { FilterState } from "@/types"
 
 interface TargetSearchProps {
   filters: FilterState
-  onToggleLanguage: (lang: LanguageTag) => void
-  onToggleEcosystem: (eco: EcosystemTag) => void
-  onToggleUserType: (type: UserTypeTag) => void
+  onToggleTag: (tag: string) => void
   onSearchChange: (query: string) => void
   matchCount: number
 }
 
 export function TargetSearch({
   filters,
-  onToggleLanguage,
-  onToggleEcosystem,
-  onToggleUserType,
+  onToggleTag,
   onSearchChange,
   matchCount,
 }: TargetSearchProps) {
@@ -41,57 +37,19 @@ export function TargetSearch({
 
       <div className="space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-          <span className="text-xs text-muted-foreground sm:w-14 shrink-0">Ecosystem</span>
+          <span className="text-xs text-muted-foreground sm:w-14 shrink-0">Tags</span>
           <div className="flex gap-1.5 flex-wrap">
-            {ECOSYSTEM_TAGS.slice(0, 6).map((eco) => (
+            {KOL_TAGS.map((tag) => (
               <Badge
-                key={eco.value}
-                variant={filters.ecosystems.includes(eco.value) ? "default" : "outline"}
+                key={tag.value}
+                variant={filters.tags.includes(tag.value) ? "default" : "outline"}
                 className={cn(
                   "cursor-pointer text-xs",
-                  filters.ecosystems.includes(eco.value) && "bg-primary text-primary-foreground"
+                  filters.tags.includes(tag.value) && "bg-primary text-primary-foreground"
                 )}
-                onClick={() => onToggleEcosystem(eco.value)}
+                onClick={() => onToggleTag(tag.value)}
               >
-                {eco.label}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-          <span className="text-xs text-muted-foreground sm:w-14 shrink-0">Language</span>
-          <div className="flex gap-1.5 flex-wrap">
-            {LANGUAGE_TAGS.slice(0, 5).map((lang) => (
-              <Badge
-                key={lang.value}
-                variant={filters.languages.includes(lang.value) ? "default" : "outline"}
-                className={cn(
-                  "cursor-pointer text-xs",
-                  filters.languages.includes(lang.value) && "bg-primary text-primary-foreground"
-                )}
-                onClick={() => onToggleLanguage(lang.value)}
-              >
-                {lang.emoji} {lang.label}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5">
-          <span className="text-xs text-muted-foreground sm:w-14 shrink-0">Type</span>
-          <div className="flex gap-1.5 flex-wrap">
-            {USER_TYPE_TAGS.slice(0, 5).map((type) => (
-              <Badge
-                key={type.value}
-                variant={filters.userTypes.includes(type.value) ? "default" : "outline"}
-                className={cn(
-                  "cursor-pointer text-xs",
-                  filters.userTypes.includes(type.value) && "bg-primary text-primary-foreground"
-                )}
-                onClick={() => onToggleUserType(type.value)}
-              >
-                {type.label}
+                {tag.label}
               </Badge>
             ))}
           </div>

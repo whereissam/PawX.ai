@@ -4,17 +4,16 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, ChevronUp, Sparkles } from "lucide-react"
 import { categorySummaries } from "@/data/tweets"
-import type { EcosystemTag } from "@/types"
 
 interface CategorySummaryProps {
-  activeEcosystems: EcosystemTag[]
+  activeTags: string[]
 }
 
-export function CategorySummary({ activeEcosystems }: CategorySummaryProps) {
+export function CategorySummary({ activeTags }: CategorySummaryProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const relevantSummaries = activeEcosystems.length > 0
-    ? categorySummaries.filter((s) => activeEcosystems.includes(s.category as EcosystemTag))
+  const relevantSummaries = activeTags.length > 0
+    ? categorySummaries.filter((s) => activeTags.includes(s.category))
     : categorySummaries.slice(0, 3)
 
   if (relevantSummaries.length === 0) return null
@@ -43,7 +42,7 @@ export function CategorySummary({ activeEcosystems }: CategorySummaryProps) {
             {relevantSummaries.map((summary) => (
               <div key={summary.category} className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-medium text-sm capitalize">{summary.category}</h4>
+                  <h4 className="font-medium text-sm">{summary.category}</h4>
                   <span className="text-xs text-muted-foreground">
                     {summary.tweetCount} tweets analyzed
                   </span>

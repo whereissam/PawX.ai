@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { X, Users } from "lucide-react"
-import type { KOL } from "@/types"
+import type { KolUser } from "@/types"
 
 function formatNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
@@ -11,7 +11,7 @@ function formatNumber(n: number): string {
 }
 
 interface KolSelectorProps {
-  selectedKols: KOL[]
+  selectedKols: KolUser[]
   onRemove: (id: string) => void
   onClearAll: () => void
 }
@@ -43,13 +43,13 @@ export function KolSelector({ selectedKols, onRemove, onClearAll }: KolSelectorP
                 className="flex items-center gap-2 p-2 sm:p-2.5 rounded-lg bg-muted/50 group"
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={kol.avatar} alt={kol.displayName} />
-                  <AvatarFallback>{kol.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`} alt={kol.name} />
+                  <AvatarFallback>{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{kol.displayName}</p>
+                  <p className="text-sm font-medium truncate">{kol.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {kol.handle} · {formatNumber(kol.followers)}
+                    @{kol.screenName} · {formatNumber(kol.followersCount)}
                   </p>
                 </div>
                 <Button

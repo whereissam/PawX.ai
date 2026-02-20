@@ -2,16 +2,14 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { LANGUAGE_TAGS, ECOSYSTEM_TAGS, USER_TYPE_TAGS } from "@/data/tags"
+import { KOL_TAGS } from "@/data/tags"
 import { Search, X, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { FilterState, LanguageTag, EcosystemTag, UserTypeTag } from "@/types"
+import type { FilterState } from "@/types"
 
 interface KolFilterBarProps {
   filters: FilterState
-  onToggleLanguage: (lang: LanguageTag) => void
-  onToggleEcosystem: (eco: EcosystemTag) => void
-  onToggleUserType: (type: UserTypeTag) => void
+  onToggleTag: (tag: string) => void
   onSearchChange: (query: string) => void
   onClear: () => void
   hasActiveFilters: boolean
@@ -19,17 +17,14 @@ interface KolFilterBarProps {
 
 export function KolFilterBar({
   filters,
-  onToggleLanguage,
-  onToggleEcosystem,
-  onToggleUserType,
+  onToggleTag,
   onSearchChange,
   onClear,
   hasActiveFilters,
 }: KolFilterBarProps) {
   const [filtersExpanded, setFiltersExpanded] = useState(true)
 
-  const activeCount =
-    filters.languages.length + filters.ecosystems.length + filters.userTypes.length
+  const activeCount = filters.tags.length
 
   return (
     <div className="space-y-3">
@@ -73,72 +68,25 @@ export function KolFilterBar({
         "space-y-2 overflow-hidden transition-all",
         filtersExpanded ? "max-h-96" : "max-h-0 sm:max-h-96"
       )}>
-        <FilterRow label="Language">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+          <span className="text-xs font-medium text-muted-foreground sm:w-16 shrink-0">Tags</span>
           <div className="flex gap-1.5 flex-wrap">
-            {LANGUAGE_TAGS.map((lang) => (
+            {KOL_TAGS.map((tag) => (
               <Badge
-                key={lang.value}
-                variant={filters.languages.includes(lang.value) ? "default" : "outline"}
+                key={tag.value}
+                variant={filters.tags.includes(tag.value) ? "default" : "outline"}
                 className={cn(
                   "cursor-pointer text-xs transition-colors",
-                  filters.languages.includes(lang.value) && "bg-primary text-primary-foreground"
+                  filters.tags.includes(tag.value) && "bg-primary text-primary-foreground"
                 )}
-                onClick={() => onToggleLanguage(lang.value)}
+                onClick={() => onToggleTag(tag.value)}
               >
-                {lang.emoji} {lang.label}
+                {tag.label}
               </Badge>
             ))}
           </div>
-        </FilterRow>
-
-        <FilterRow label="Ecosystem">
-          <div className="flex gap-1.5 flex-wrap">
-            {ECOSYSTEM_TAGS.map((eco) => {
-              const isActive = filters.ecosystems.includes(eco.value)
-              return (
-                <Badge
-                  key={eco.value}
-                  variant={isActive ? "default" : "outline"}
-                  className={cn(
-                    "cursor-pointer text-xs transition-colors",
-                    isActive ? "bg-primary text-primary-foreground" : eco.color
-                  )}
-                  onClick={() => onToggleEcosystem(eco.value)}
-                >
-                  {eco.label}
-                </Badge>
-              )
-            })}
-          </div>
-        </FilterRow>
-
-        <FilterRow label="Type">
-          <div className="flex gap-1.5 flex-wrap">
-            {USER_TYPE_TAGS.map((type) => (
-              <Badge
-                key={type.value}
-                variant={filters.userTypes.includes(type.value) ? "default" : "outline"}
-                className={cn(
-                  "cursor-pointer text-xs transition-colors",
-                  filters.userTypes.includes(type.value) && "bg-primary text-primary-foreground"
-                )}
-                onClick={() => onToggleUserType(type.value)}
-              >
-                {type.label}
-              </Badge>
-            ))}
-          </div>
-        </FilterRow>
+        </div>
       </div>
-    </div>
-  )
-}
-
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
-      <span className="text-xs font-medium text-muted-foreground sm:w-16 shrink-0">{label}</span>
-      {children}
     </div>
   )
 }

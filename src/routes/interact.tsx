@@ -8,10 +8,10 @@ import { StyleAnalyzer } from "@/components/interact/style-analyzer"
 import { InteractionFeed } from "@/components/interact/interaction-feed"
 import { Play, Square } from "lucide-react"
 import { kols } from "@/data/kols"
-import type { KOL } from "@/types"
+import type { KolUser } from "@/types"
 
 function InteractPage() {
-  const [selectedKols, setSelectedKols] = useState<KOL[]>(() => kols.slice(0, 3))
+  const [selectedKols, setSelectedKols] = useState<KolUser[]>(() => kols.slice(0, 2))
   const [isRunning, setIsRunning] = useState(false)
 
   const handleRemove = (id: string) => {

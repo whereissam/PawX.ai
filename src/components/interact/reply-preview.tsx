@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MessageSquare, Heart, Repeat2, ArrowRight } from "lucide-react"
+import { MessageSquare, Heart, Repeat2, ArrowRight, Eye } from "lucide-react"
 import { kols } from "@/data/kols"
 import type { Interaction } from "@/types"
 
@@ -40,30 +40,34 @@ export function ReplyPreview({ interaction }: ReplyPreviewProps) {
         {/* Original tweet */}
         <div className="flex items-start gap-2 sm:gap-3">
           <Avatar className="h-7 w-7 sm:h-8 sm:w-8 shrink-0">
-            <AvatarImage src={kol.avatar} alt={kol.displayName} />
-            <AvatarFallback>{kol.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`} alt={kol.name} />
+            <AvatarFallback>{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-              <span className="font-medium text-sm truncate">{kol.displayName}</span>
-              <span className="text-xs text-muted-foreground hidden sm:inline">{kol.handle}</span>
+              <span className="font-medium text-sm truncate">{kol.name}</span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">@{kol.screenName}</span>
               <span className="text-xs text-muted-foreground ml-auto shrink-0">
-                {timeAgo(interaction.tweet.timestamp)}
+                {timeAgo(interaction.tweet.createdAt)}
               </span>
             </div>
-            <p className="text-sm mt-1">{interaction.tweet.content}</p>
+            <p className="text-sm mt-1">{interaction.tweet.text}</p>
             <div className="flex items-center gap-3 sm:gap-4 mt-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Heart className="h-3 w-3" />
-                {formatNumber(interaction.tweet.likes)}
+                {formatNumber(interaction.tweet.favoriteCount)}
               </span>
               <span className="flex items-center gap-1">
                 <Repeat2 className="h-3 w-3" />
-                {formatNumber(interaction.tweet.retweets)}
+                {formatNumber(interaction.tweet.retweetCount)}
               </span>
               <span className="flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />
-                {formatNumber(interaction.tweet.replies)}
+                {formatNumber(interaction.tweet.replyCount)}
+              </span>
+              <span className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                {formatNumber(interaction.tweet.viewCount)}
               </span>
             </div>
           </div>

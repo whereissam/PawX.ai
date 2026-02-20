@@ -1,10 +1,10 @@
 import { ReplyPreview } from "./reply-preview"
 import { mockInteractions } from "@/data/tweets"
 import { MessageSquare } from "lucide-react"
-import type { KOL } from "@/types"
+import type { KolUser } from "@/types"
 
 interface InteractionFeedProps {
-  selectedKols: KOL[]
+  selectedKols: KolUser[]
 }
 
 export function InteractionFeed({ selectedKols }: InteractionFeedProps) {

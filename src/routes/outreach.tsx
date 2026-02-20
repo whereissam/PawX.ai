@@ -6,37 +6,35 @@ import { OutreachForm } from "@/components/outreach/outreach-form"
 import { TargetSearch } from "@/components/outreach/target-search"
 import { CampaignList } from "@/components/outreach/campaign-list"
 import { kols } from "@/data/kols"
-import type { FilterState, LanguageTag, EcosystemTag, UserTypeTag, OutreachCampaign } from "@/types"
+import type { FilterState, OutreachCampaign } from "@/types"
 
 function OutreachPage() {
   const [filters, setFilters] = useState<FilterState>({
-    languages: [],
-    ecosystems: [],
-    userTypes: [],
+    tags: [],
     searchQuery: "",
   })
 
   const [campaigns, setCampaigns] = useState<OutreachCampaign[]>([
     {
       id: "demo-1",
-      name: "Ethereum DeFi KOL Partnerships",
-      template: "Hey {{name}}, love your work on {{ecosystem}}. Would love to explore a partnership for our upcoming launch.",
-      targetFilters: { languages: [], ecosystems: ["ethereum"], userTypes: ["influencer"], searchQuery: "" },
-      targets: kols.filter((k) => k.ecosystems.includes("ethereum")).slice(0, 8),
+      name: "Elon Musk Engagement Campaign",
+      template: "Hey {{name}}, love your work on {{topic}}. Would love to explore a partnership for our upcoming launch.",
+      targetFilters: { tags: ["Elon Musk"], searchQuery: "" },
+      targets: kols.filter((k) => k.tags.includes("Elon Musk")),
       status: "sending",
-      sentCount: 5,
-      totalCount: 8,
+      sentCount: 1,
+      totalCount: 1,
       createdAt: "2026-02-19T10:00:00Z",
     },
     {
       id: "demo-2",
-      name: "Solana Builder Outreach",
-      template: "Hi {{name}}, we're building on Solana and would love to chat about your experience in the ecosystem.",
-      targetFilters: { languages: [], ecosystems: ["solana"], userTypes: ["developer"], searchQuery: "" },
-      targets: kols.filter((k) => k.ecosystems.includes("solana")).slice(0, 5),
+      name: "CZ Outreach",
+      template: "Hi {{name}}, we're building in the crypto space and would love to chat about your experience.",
+      targetFilters: { tags: ["CZ"], searchQuery: "" },
+      targets: kols.filter((k) => k.tags.includes("CZ")),
       status: "completed",
-      sentCount: 5,
-      totalCount: 5,
+      sentCount: 1,
+      totalCount: 1,
       createdAt: "2026-02-18T14:00:00Z",
     },
   ])
@@ -44,56 +42,28 @@ function OutreachPage() {
   const filteredKols = useMemo(() => {
     return kols.filter((kol) => {
       if (
-        filters.languages.length > 0 &&
-        !filters.languages.some((l) => kol.languages.includes(l))
-      )
-        return false
-      if (
-        filters.ecosystems.length > 0 &&
-        !filters.ecosystems.some((e) => kol.ecosystems.includes(e))
-      )
-        return false
-      if (
-        filters.userTypes.length > 0 &&
-        !filters.userTypes.some((t) => kol.userTypes.includes(t))
+        filters.tags.length > 0 &&
+        !filters.tags.some((t) => kol.tags.includes(t))
       )
         return false
       if (filters.searchQuery) {
         const q = filters.searchQuery.toLowerCase()
         return (
-          kol.displayName.toLowerCase().includes(q) ||
-          kol.handle.toLowerCase().includes(q) ||
-          kol.bio.toLowerCase().includes(q)
+          kol.name.toLowerCase().includes(q) ||
+          kol.screenName.toLowerCase().includes(q) ||
+          kol.description.toLowerCase().includes(q)
         )
       }
       return true
     })
   }, [filters])
 
-  const toggleLanguage = useCallback((lang: LanguageTag) => {
+  const toggleTag = useCallback((tag: string) => {
     setFilters((prev) => ({
       ...prev,
-      languages: prev.languages.includes(lang)
-        ? prev.languages.filter((l) => l !== lang)
-        : [...prev.languages, lang],
-    }))
-  }, [])
-
-  const toggleEcosystem = useCallback((eco: EcosystemTag) => {
-    setFilters((prev) => ({
-      ...prev,
-      ecosystems: prev.ecosystems.includes(eco)
-        ? prev.ecosystems.filter((e) => e !== eco)
-        : [...prev.ecosystems, eco],
-    }))
-  }, [])
-
-  const toggleUserType = useCallback((type: UserTypeTag) => {
-    setFilters((prev) => ({
-      ...prev,
-      userTypes: prev.userTypes.includes(type)
-        ? prev.userTypes.filter((t) => t !== type)
-        : [...prev.userTypes, type],
+      tags: prev.tags.includes(tag)
+        ? prev.tags.filter((t) => t !== tag)
+        : [...prev.tags, tag],
     }))
   }, [])
 
@@ -160,9 +130,7 @@ function OutreachPage() {
               <CardContent className="p-3 sm:p-4">
                 <TargetSearch
                   filters={filters}
-                  onToggleLanguage={toggleLanguage}
-                  onToggleEcosystem={toggleEcosystem}
-                  onToggleUserType={toggleUserType}
+                  onToggleTag={toggleTag}
                   onSearchChange={setSearchQuery}
                   matchCount={filteredKols.length}
                 />

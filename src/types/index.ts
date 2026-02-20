@@ -1,65 +1,86 @@
-// Tag types
-export type LanguageTag =
-  | "chinese"
-  | "japanese"
-  | "korean"
-  | "english"
-  | "russian"
-  | "spanish"
-  | "french"
-  | "vietnamese"
-  | "thai"
-  | "arabic"
-
-export type EcosystemTag =
-  | "ethereum"
-  | "solana"
-  | "monad"
-  | "base"
-  | "bitcoin"
-  | "polygon"
-  | "arbitrum"
-  | "avalanche"
-  | "sui"
-  | "aptos"
-  | "ton"
-  | "cosmos"
-
-export type UserTypeTag =
-  | "developer"
-  | "trader"
-  | "community"
-  | "investor"
-  | "researcher"
-  | "influencer"
-  | "founder"
-  | "artist"
-
-export interface KOL {
+// API response sub-types
+export interface UserMention {
   id: string
-  handle: string
-  displayName: string
-  avatar: string
-  bio: string
-  followers: number
-  following: number
-  website?: string
-  location?: string
-  joinedDate: string
-  verified: boolean
-  languages: LanguageTag[]
-  ecosystems: EcosystemTag[]
-  userTypes: UserTypeTag[]
+  username: string
+  displayname: string
 }
 
+export interface UrlEntity {
+  url: string
+  expandedUrl: string
+  displayUrl: string
+}
+
+export interface Hashtag {
+  text: string
+}
+
+export interface TweetEntities {
+  urls?: UrlEntity[]
+  hashtags?: Hashtag[]
+  userMentions?: UserMention[]
+}
+
+export interface MediaVideoInfo {
+  durationMillis?: number
+  variants?: { bitrate?: number; contentType: string; url: string }[]
+}
+
+export interface Media {
+  id: string
+  type: string
+  url: string
+  previewUrl?: string
+  videoInfo?: MediaVideoInfo
+}
+
+// API tweet object
 export interface Tweet {
   id: string
-  kolId: string
-  content: string
-  timestamp: string
-  likes: number
-  retweets: number
-  replies: number
+  conversationId: string
+  text: string
+  entities?: TweetEntities
+  medias?: Media[]
+  inReplyToTweetId?: string
+  inReplyToUser?: string
+  quotedTweetId?: string
+  retweetedTweetId?: string
+  favoriteCount: number
+  bookmarkCount: number
+  viewCount: number
+  quoteCount: number
+  replyCount: number
+  retweetCount: number
+  fullText: string
+  notetweetEntities?: TweetEntities
+  createdAt: string
+}
+
+// API user object
+export interface KolUser {
+  id: string
+  name: string
+  screenName: string
+  location?: string
+  description: string
+  website?: string
+  followersCount: number
+  friendsCount: number
+  kolFollowersCount: number
+  isKol: boolean
+  tags: string[]
+}
+
+// API response item: { tweet, user }
+export interface TweetResponse {
+  tweet: Tweet
+  user: KolUser
+}
+
+// App types
+export interface FilterState {
+  tags: string[]
+  searchQuery: string
 }
 
 export interface CategorySummary {
@@ -93,16 +114,9 @@ export interface OutreachCampaign {
   name: string
   template: string
   targetFilters: FilterState
-  targets: KOL[]
+  targets: KolUser[]
   status: "draft" | "sending" | "completed"
   sentCount: number
   totalCount: number
   createdAt: string
-}
-
-export interface FilterState {
-  languages: LanguageTag[]
-  ecosystems: EcosystemTag[]
-  userTypes: UserTypeTag[]
-  searchQuery: string
 }

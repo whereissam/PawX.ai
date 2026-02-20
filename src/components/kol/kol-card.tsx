@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { TagBadge } from "@/components/tag-badge"
 import { ExternalLink, Users, UserPlus } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { KOL } from "@/types"
+import type { KolUser } from "@/types"
 
 function formatNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
@@ -13,10 +13,10 @@ function formatNumber(n: number): string {
 }
 
 interface KolCardProps {
-  kol: KOL
+  kol: KolUser
   isSelected: boolean
   onToggleSelect: (id: string) => void
-  onViewDetail: (kol: KOL) => void
+  onViewDetail: (kol: KolUser) => void
 }
 
 export function KolCard({ kol, isSelected, onToggleSelect, onViewDetail }: KolCardProps) {
@@ -37,8 +37,8 @@ export function KolCard({ kol, isSelected, onToggleSelect, onViewDetail }: KolCa
             }}
           >
             <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-              <AvatarImage src={kol.avatar} alt={kol.displayName} />
-              <AvatarFallback>{kol.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`} alt={kol.name} />
+              <AvatarFallback>{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div
               className={cn(
@@ -55,8 +55,8 @@ export function KolCard({ kol, isSelected, onToggleSelect, onViewDetail }: KolCa
 
           <div className="flex-1 min-w-0" onClick={() => onViewDetail(kol)}>
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-sm truncate">{kol.displayName}</h3>
-              {kol.verified && (
+              <h3 className="font-semibold text-sm truncate">{kol.name}</h3>
+              {kol.isKol && (
                 <svg className="h-3.5 w-3.5 text-blue-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path
                     fillRule="evenodd"
@@ -66,17 +66,17 @@ export function KolCard({ kol, isSelected, onToggleSelect, onViewDetail }: KolCa
                 </svg>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">{kol.handle}</p>
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{kol.bio}</p>
+            <p className="text-xs text-muted-foreground">@{kol.screenName}</p>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{kol.description}</p>
 
             <div className="flex items-center gap-2 sm:gap-3 mt-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
-                {formatNumber(kol.followers)}
+                {formatNumber(kol.followersCount)}
               </span>
               <span className="flex items-center gap-1">
                 <UserPlus className="h-3 w-3" />
-                {formatNumber(kol.following)}
+                {formatNumber(kol.friendsCount)}
               </span>
               {kol.website && (
                 <ExternalLink className="h-3 w-3" />
@@ -86,15 +86,12 @@ export function KolCard({ kol, isSelected, onToggleSelect, onViewDetail }: KolCa
         </div>
 
         <div className="flex flex-wrap gap-1 mt-2.5 sm:mt-3" onClick={() => onViewDetail(kol)}>
-          {kol.ecosystems.slice(0, 3).map((eco) => (
-            <TagBadge key={eco} tag={eco} type="ecosystem" />
+          {kol.tags.slice(0, 3).map((tag) => (
+            <TagBadge key={tag} tag={tag} />
           ))}
-          {kol.ecosystems.length > 3 && (
-            <span className="text-xs text-muted-foreground">+{kol.ecosystems.length - 3}</span>
+          {kol.tags.length > 3 && (
+            <span className="text-xs text-muted-foreground">+{kol.tags.length - 3}</span>
           )}
-          {kol.userTypes.slice(0, 2).map((type) => (
-            <TagBadge key={type} tag={type} type="userType" />
-          ))}
         </div>
       </CardContent>
     </Card>

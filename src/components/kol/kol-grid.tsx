@@ -1,11 +1,11 @@
 import { KolCard } from "./kol-card"
-import type { KOL } from "@/types"
+import type { KolUser } from "@/types"
 
 interface KolGridProps {
-  kols: KOL[]
+  kols: KolUser[]
   selectedKolIds: Set<string>
   onToggleSelect: (id: string) => void
-  onViewDetail: (kol: KOL) => void
+  onViewDetail: (kol: KolUser) => void
 }
 
 export function KolGrid({ kols, selectedKolIds, onToggleSelect, onViewDetail }: KolGridProps) {

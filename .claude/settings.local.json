@@ -3,7 +3,8 @@
     "allow": [
       "Bash(bunx shadcn@latest add:*)",
       "Bash(bun run build:*)",
-      "Bash(bunx @tanstack/router-cli generate:*)"
+      "Bash(bunx @tanstack/router-cli generate:*)",
+      "Bash(bun add:*)"
     ],
     "deny": []
   }

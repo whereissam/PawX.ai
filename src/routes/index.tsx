@@ -7,7 +7,7 @@ import { KolDetailDrawer } from "@/components/kol/kol-detail-drawer"
 import { CategorySummary } from "@/components/kol/category-summary"
 import { Badge } from "@/components/ui/badge"
 import { useKolFilter } from "@/hooks/use-kol-filter"
-import type { KOL } from "@/types"
+import type { KolUser } from "@/types"
 
 function KolDirectoryPage() {
   const {
@@ -15,19 +15,17 @@ function KolDirectoryPage() {
     filteredKols,
     selectedKolIds,
     hasActiveFilters,
-    toggleLanguage,
-    toggleEcosystem,
-    toggleUserType,
+    toggleTag,
     setSearchQuery,
     clearFilters,
     toggleKolSelection,
     clearSelection,
   } = useKolFilter()
 
-  const [detailKol, setDetailKol] = useState<KOL | null>(null)
+  const [detailKol, setDetailKol] = useState<KolUser | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const handleViewDetail = (kol: KOL) => {
+  const handleViewDetail = (kol: KolUser) => {
     setDetailKol(kol)
     setDrawerOpen(true)
   }
@@ -66,9 +64,7 @@ function KolDirectoryPage() {
         <div className="mb-4 sm:mb-6">
           <KolFilterBar
             filters={filters}
-            onToggleLanguage={toggleLanguage}
-            onToggleEcosystem={toggleEcosystem}
-            onToggleUserType={toggleUserType}
+            onToggleTag={toggleTag}
             onSearchChange={setSearchQuery}
             onClear={clearFilters}
             hasActiveFilters={hasActiveFilters}
@@ -77,7 +73,7 @@ function KolDirectoryPage() {
 
         {/* Category Summary */}
         <div className="mb-4 sm:mb-6">
-          <CategorySummary activeEcosystems={filters.ecosystems} />
+          <CategorySummary activeTags={filters.tags} />
         </div>
 
         {/* Results count */}

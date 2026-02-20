@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bunx shadcn@latest add:*)",
+      "Bash(bun run build:*)",
+      "Bash(bunx @tanstack/router-cli generate:*)"
+    ],
+    "deny": []
+  }
+}

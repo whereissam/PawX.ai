@@ -2,7 +2,6 @@ import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { KolSelector } from "@/components/interact/kol-selector"
 import { StyleAnalyzer } from "@/components/interact/style-analyzer"
 import { InteractionFeed } from "@/components/interact/interaction-feed"
@@ -23,7 +22,7 @@ function InteractPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-muted-foreground">
+    <div className="min-h-screen">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-bold">KOL Interaction</h1>
@@ -99,7 +98,6 @@ function InteractPage() {
                 </div>
               )}
             </div>
-            <Separator className="mb-3 sm:mb-4" />
             <InteractionFeed selectedKols={selectedKols} />
           </div>
         </div>

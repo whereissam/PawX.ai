@@ -40,7 +40,7 @@ export function KolSelector({ selectedKols, onRemove, onClearAll }: KolSelectorP
             {selectedKols.map((kol) => (
               <div
                 key={kol.id}
-                className="flex items-center gap-2 p-2 sm:p-2.5 rounded-lg bg-muted/50 group"
+                className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-md bg-surface-2/60 group"
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`} alt={kol.name} />

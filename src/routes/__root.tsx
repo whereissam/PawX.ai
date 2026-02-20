@@ -1,13 +1,12 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { MobileNav } from '@/components/mobile-nav'
 import { PawXLogo } from '@/components/logo'
 
 export const Route = createRootRoute({
   component: () => (
     <>
-      <nav className="bg-background border-b border-border sticky top-0 z-40 text-muted-foreground">
+      <nav className="bg-surface shadow-raised sticky top-0 z-40">
         <div className="container mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between h-14 sm:h-16">
             <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-8">
@@ -39,8 +38,7 @@ export const Route = createRootRoute({
                 </Link>
               </div>
             </div>
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <ThemeToggle />
+            <div className="flex items-center">
               <MobileNav />
             </div>
           </div>

@@ -5,7 +5,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
 import { TagBadge } from "@/components/tag-badge"
 import { Button } from "@/components/ui/button"
 import { Users, UserPlus, MapPin, Globe, Eye } from "lucide-react"
@@ -75,7 +74,7 @@ export function KolDetailDrawer({
           </div>
         </SheetHeader>
 
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 space-y-5">
           <p className="text-sm">{kol.description}</p>
 
           <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
@@ -111,8 +110,6 @@ export function KolDetailDrawer({
             )}
           </div>
 
-          <Separator />
-
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Tags</h4>
             <div className="flex flex-wrap gap-1">
@@ -121,8 +118,6 @@ export function KolDetailDrawer({
               ))}
             </div>
           </div>
-
-          <Separator />
 
           <Button
             variant={isSelected ? "secondary" : "default"}
@@ -133,27 +128,24 @@ export function KolDetailDrawer({
           </Button>
 
           {kolTweets.length > 0 && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium">Recent Tweets</h4>
-                {kolTweets.map((tweet) => (
-                  <div key={tweet.id} className="p-2.5 sm:p-3 bg-muted rounded-lg space-y-2">
-                    <p className="text-sm">{tweet.text}</p>
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
-                      <span>{formatNumber(tweet.favoriteCount)} likes</span>
-                      <span>{formatNumber(tweet.retweetCount)} RT</span>
-                      <span>{formatNumber(tweet.replyCount)} replies</span>
-                      <span className="flex items-center gap-0.5">
-                        <Eye className="h-3 w-3" />
-                        {formatNumber(tweet.viewCount)}
-                      </span>
-                      <span className="sm:ml-auto">{timeAgo(tweet.createdAt)}</span>
-                    </div>
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium">Recent Tweets</h4>
+              {kolTweets.map((tweet) => (
+                <div key={tweet.id} className="p-3 sm:p-4 bg-surface-2 rounded-md shadow-neu-inset space-y-2">
+                  <p className="text-sm">{tweet.text}</p>
+                  <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
+                    <span>{formatNumber(tweet.favoriteCount)} likes</span>
+                    <span>{formatNumber(tweet.retweetCount)} RT</span>
+                    <span>{formatNumber(tweet.replyCount)} replies</span>
+                    <span className="flex items-center gap-0.5">
+                      <Eye className="h-3 w-3" />
+                      {formatNumber(tweet.viewCount)}
+                    </span>
+                    <span className="sm:ml-auto">{timeAgo(tweet.createdAt)}</span>
                   </div>
-                ))}
-              </div>
-            </>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </SheetContent>

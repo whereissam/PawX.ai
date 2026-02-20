@@ -29,9 +29,9 @@ export function ReplyPreview({ interaction }: ReplyPreviewProps) {
   if (!kol) return null
 
   const statusColor = {
-    pending: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
-    sent: "bg-green-500/10 text-green-600 dark:text-green-400",
-    failed: "bg-red-500/10 text-red-600 dark:text-red-400",
+    pending: "bg-yellow-500/10 text-yellow-700",
+    sent: "bg-green-500/10 text-green-700",
+    failed: "bg-red-500/10 text-red-700",
   }
 
   return (
@@ -80,13 +80,13 @@ export function ReplyPreview({ interaction }: ReplyPreviewProps) {
           <Badge variant="secondary" className="text-xs">
             {interaction.replyStyle}
           </Badge>
-          <Badge className={`text-xs ml-auto border-0 ${statusColor[interaction.status]}`}>
+          <Badge className={`text-xs ml-auto ${statusColor[interaction.status]}`}>
             {interaction.status}
           </Badge>
         </div>
 
         {/* Reply */}
-        <div className="ml-4 sm:ml-8 p-2.5 sm:p-3 bg-primary/5 border border-primary/20 rounded-lg">
+        <div className="ml-4 sm:ml-8 p-3 sm:p-4 bg-surface-2 shadow-neu-inset rounded-md">
           <p className="text-sm">{interaction.replyContent}</p>
           <p className="text-xs text-muted-foreground mt-1.5 sm:mt-2">
             {timeAgo(interaction.timestamp)}

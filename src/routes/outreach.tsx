@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { OutreachForm } from "@/components/outreach/outreach-form"
 import { TargetSearch } from "@/components/outreach/target-search"
 import { CampaignList } from "@/components/outreach/campaign-list"
@@ -114,7 +113,7 @@ function OutreachPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-muted-foreground">
+    <div className="min-h-screen">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="mb-4 sm:mb-6">
           <h1 className="text-xl sm:text-2xl font-bold">BD Outreach</h1>
@@ -143,7 +142,6 @@ function OutreachPage() {
           {/* Right panel */}
           <div className="lg:col-span-7">
             <h2 className="font-semibold text-sm sm:text-base mb-3 sm:mb-4">Campaigns</h2>
-            <Separator className="mb-3 sm:mb-4" />
             <CampaignList
               campaigns={campaigns}
               onSend={handleSendCampaign}

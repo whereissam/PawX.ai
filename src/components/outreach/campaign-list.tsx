@@ -5,9 +5,9 @@ import { Send, FileText, Trash2 } from "lucide-react"
 import type { OutreachCampaign } from "@/types"
 
 const statusConfig = {
-  draft: { label: "Draft", color: "bg-gray-500/10 text-gray-600 dark:text-gray-400" },
-  sending: { label: "Sending", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
-  completed: { label: "Completed", color: "bg-green-500/10 text-green-600 dark:text-green-400" },
+  draft: { label: "Draft", color: "bg-foreground/10 text-foreground/70" },
+  sending: { label: "Sending", color: "bg-blue-500/10 text-blue-700" },
+  completed: { label: "Completed", color: "bg-green-500/10 text-green-700" },
 }
 
 function timeAgo(timestamp: string): string {
@@ -48,7 +48,7 @@ export function CampaignList({ campaigns, onSend, onDelete }: CampaignListProps)
                 <div className="space-y-1 min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="font-medium text-sm truncate">{campaign.name}</h4>
-                    <Badge className={`text-xs border-0 shrink-0 ${status.color}`}>
+                    <Badge className={`text-xs shrink-0 ${status.color}`}>
                       {status.label}
                     </Badge>
                   </div>
@@ -86,7 +86,7 @@ export function CampaignList({ campaigns, onSend, onDelete }: CampaignListProps)
 
               {campaign.status === "sending" && (
                 <div className="mt-2.5 sm:mt-3">
-                  <div className="w-full bg-muted rounded-full h-1.5">
+                  <div className="w-full bg-surface-2 shadow-neu-inset rounded-full h-1.5">
                     <div
                       className="bg-primary h-1.5 rounded-full transition-all"
                       style={{

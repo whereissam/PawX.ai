@@ -23,8 +23,8 @@ export function KolCard({ kol, isSelected, onToggleSelect, onViewDetail }: KolCa
   return (
     <Card
       className={cn(
-        "group cursor-pointer transition-all hover:shadow-md hover:border-primary/30 active:scale-[0.98]",
-        isSelected && "border-primary ring-1 ring-primary/20"
+        "group cursor-pointer transition-all duration-200 hover:shadow-raised-hover hover:-translate-y-0.5 active:shadow-neu-inset active:translate-y-0",
+        isSelected && "shadow-raised-hover ring-2 ring-primary/30"
       )}
     >
       <CardContent className="p-3 sm:p-4">
@@ -48,7 +48,7 @@ export function KolCard({ kol, isSelected, onToggleSelect, onViewDetail }: KolCa
             >
               <Checkbox
                 checked={isSelected}
-                className="h-4 w-4 bg-background"
+                className="h-4 w-4"
               />
             </div>
           </div>

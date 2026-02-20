@@ -19,11 +19,11 @@ export function CategorySummary({ activeTags }: CategorySummaryProps) {
   if (relevantSummaries.length === 0) return null
 
   return (
-    <Card className="border-primary/20 bg-primary/5">
+    <Card>
       <CardContent className="p-3 sm:p-4">
         <Button
           variant="ghost"
-          className="w-full flex items-center justify-between p-0 h-auto hover:bg-transparent"
+          className="w-full flex items-center justify-between p-0 h-auto hover:bg-transparent shadow-none"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="flex items-center gap-2">

@@ -26,11 +26,11 @@ export function MobileNav() {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/20 z-40"
+            className="fixed inset-0 bg-[rgba(47,59,74,0.3)] z-40"
             onClick={() => setIsOpen(false)}
           />
           {/* Menu */}
-          <div className="fixed top-14 left-0 right-0 shadow-xl z-50 bg-background border-b border-border">
+          <div className="fixed top-14 left-0 right-0 shadow-raised-hover z-50 bg-surface">
             <div className="px-4 py-2">
               <div className="flex flex-col">
                 <Link

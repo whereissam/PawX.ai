@@ -53,7 +53,7 @@ export function OutreachForm({ onCreateCampaign }: OutreachFormProps) {
           </div>
 
           {showPreview ? (
-            <div className="p-2.5 sm:p-3 bg-muted rounded-lg">
+            <div className="p-3 sm:p-4 bg-surface-2 shadow-neu-inset rounded-md">
               <p className="text-sm whitespace-pre-wrap">{previewText}</p>
             </div>
           ) : (

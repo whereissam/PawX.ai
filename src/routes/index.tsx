@@ -31,7 +31,7 @@ function KolDirectoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-muted-foreground">
+    <div className="min-h-screen">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Header */}
         <div className="flex items-center gap-2.5 sm:gap-3 mb-2">
@@ -46,14 +46,14 @@ function KolDirectoryPage() {
 
         {/* Selection bar */}
         {selectedKolIds.size > 0 && (
-          <div className="flex items-center gap-2 mb-4 p-2.5 sm:p-3 bg-primary/5 border border-primary/20 rounded-lg flex-wrap">
+          <div className="flex items-center gap-2 mb-4 p-2.5 sm:p-3 bg-surface shadow-raised-sm rounded-lg flex-wrap">
             <Badge variant="default">{selectedKolIds.size} selected</Badge>
             <span className="text-xs sm:text-sm text-muted-foreground">
               Ready for interaction
             </span>
             <button
               onClick={clearSelection}
-              className="ml-auto text-xs text-muted-foreground hover:text-foreground"
+              className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               Clear
             </button>

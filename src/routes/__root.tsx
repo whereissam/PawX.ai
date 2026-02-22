@@ -25,10 +25,16 @@ export const Route = createRootRoute({
                   KOL Directory
                 </Link>
                 <Link
+                  to="/configure"
+                  className="text-sm text-muted-foreground hover:text-foreground [&.active]:text-primary [&.active]:font-medium transition-colors"
+                >
+                  Configure
+                </Link>
+                <Link
                   to="/interact"
                   className="text-sm text-muted-foreground hover:text-foreground [&.active]:text-primary [&.active]:font-medium transition-colors"
                 >
-                  Interact
+                  Monitor
                 </Link>
                 <Link
                   to="/outreach"

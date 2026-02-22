@@ -14,16 +14,16 @@
     --tracking-widest: 0.1em;
     --letter-spacing: 0em;
 
-    /* Neumorphic Radius (larger, softer corners) */
-    --radius-sm: 14px;
-    --radius-md: 18px;
-    --radius-lg: 26px;
-    --radius-xl: 34px;
-    --radius-2xl: 42px;
-    --radius-3xl: 50px;
-    --radius-4xl: 58px;
+    /* Neumorphic Radius (slightly tightened for professional feel) */
+    --radius-sm: 10px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-2xl: 34px;
+    --radius-3xl: 42px;
+    --radius-4xl: 50px;
 
-    /* PawX Brand Colors */
+    /* PawX Brand Colors — Creamy Professional v2 */
     --color-bg: var(--bg);
     --color-surface: var(--surface);
     --color-surface-2: var(--surface-2);
@@ -49,52 +49,56 @@
     --color-input: var(--input);
     --color-ring: var(--ring);
 
-    /* Neumorphic Shadow Presets */
-    --shadow-raised: 12px 12px 26px rgba(150, 83, 16, 0.32), -12px -12px 26px rgba(255, 232, 170, 0.92);
-    --shadow-raised-hover: 16px 16px 34px rgba(150, 83, 16, 0.36), -16px -16px 34px rgba(255, 232, 170, 0.96);
-    --shadow-raised-sm: 6px 6px 14px rgba(150, 83, 16, 0.32), -6px -6px 14px rgba(255, 232, 170, 0.92);
-    --shadow-neu-inset: inset 10px 10px 20px rgba(150, 83, 16, 0.28), inset -10px -10px 20px rgba(255, 232, 170, 0.92);
-    --shadow-raised-focus: 12px 12px 26px rgba(150, 83, 16, 0.32), -12px -12px 26px rgba(255, 232, 170, 0.92), 0 0 0 4px rgba(229, 125, 24, 0.22);
-    --shadow-inset-focus: inset 10px 10px 20px rgba(150, 83, 16, 0.28), inset -10px -10px 20px rgba(255, 232, 170, 0.92), 0 0 0 4px rgba(229, 125, 24, 0.22);
+    /* Neumorphic Shadow Presets — refined, subtler for professional look */
+    --shadow-raised: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+    --shadow-raised-hover: 12px 12px 20px var(--shadow-dark), -12px -12px 20px var(--shadow-light);
+    --shadow-raised-sm: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+    --shadow-neu-inset: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    --shadow-raised-focus: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light), 0 0 0 3px rgba(51, 65, 85, 0.15);
+    --shadow-inset-focus: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light), 0 0 0 3px rgba(51, 65, 85, 0.15);
 
     /* Standard Tailwind shadow names -> neumorphic values */
-    --shadow-2xs: 4px 4px 8px rgba(150, 83, 16, 0.2), -4px -4px 8px rgba(255, 232, 170, 0.7);
-    --shadow-xs: 4px 4px 8px rgba(150, 83, 16, 0.2), -4px -4px 8px rgba(255, 232, 170, 0.7);
-    --shadow-sm: 6px 6px 14px rgba(150, 83, 16, 0.32), -6px -6px 14px rgba(255, 232, 170, 0.92);
-    --shadow: 12px 12px 26px rgba(150, 83, 16, 0.32), -12px -12px 26px rgba(255, 232, 170, 0.92);
-    --shadow-md: 12px 12px 26px rgba(150, 83, 16, 0.32), -12px -12px 26px rgba(255, 232, 170, 0.92);
-    --shadow-lg: 16px 16px 34px rgba(150, 83, 16, 0.36), -16px -16px 34px rgba(255, 232, 170, 0.96);
-    --shadow-xl: 16px 16px 34px rgba(150, 83, 16, 0.36), -16px -16px 34px rgba(255, 232, 170, 0.96);
-    --shadow-2xl: 20px 20px 40px rgba(150, 83, 16, 0.4), -20px -20px 40px rgba(255, 232, 170, 1);
+    --shadow-2xs: 2px 2px 6px var(--shadow-dark), -2px -2px 6px var(--shadow-light);
+    --shadow-xs: 3px 3px 8px var(--shadow-dark), -3px -3px 8px var(--shadow-light);
+    --shadow-sm: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+    --shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+    --shadow-md: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+    --shadow-lg: 12px 12px 20px var(--shadow-dark), -12px -12px 20px var(--shadow-light);
+    --shadow-xl: 12px 12px 20px var(--shadow-dark), -12px -12px 20px var(--shadow-light);
+    --shadow-2xl: 16px 16px 28px var(--shadow-dark), -16px -16px 28px var(--shadow-light);
 }
 
 :root {
-    /* PawX Brand Tokens */
-    --bg: #F6B53A;
-    --surface: #F8BE4A;
-    --surface-2: #F2AA2F;
+    /* ── PawX Brand Tokens — Creamy Professional v2 ── */
+    --bg: #F5F2ED;
+    --surface: #F5F2ED;
+    --surface-2: #EBE7E0;
 
-    /* shadcn compat (mapped to PawX palette) */
-    --background: #F6B53A;
-    --foreground: #2F3B4A;
-    --card: #F8BE4A;
-    --card-foreground: #2F3B4A;
-    --popover: #F8BE4A;
-    --popover-foreground: #2F3B4A;
-    --primary: #E57D18;
+    /* Shadow colors — subtle, warm-neutral */
+    --shadow-dark: rgba(201, 193, 181, 0.4);
+    --shadow-light: rgba(255, 255, 255, 0.9);
+
+    /* shadcn compat (mapped to PawX creamy palette) */
+    --background: #F5F2ED;
+    --foreground: #1E293B;
+    --card: #F5F2ED;
+    --card-foreground: #1E293B;
+    --popover: #F5F2ED;
+    --popover-foreground: #1E293B;
+    --primary: #334155;
     --primary-foreground: #FFFFFF;
-    --secondary: #F8BE4A;
-    --secondary-foreground: #2F3B4A;
-    --muted: #F2AA2F;
-    --muted-foreground: rgba(47, 59, 74, 0.72);
-    --accent: #E57D18;
+    --secondary: #EBE7E0;
+    --secondary-foreground: #1E293B;
+    --muted: #EBE7E0;
+    --muted-foreground: #64748B;
+    --accent: #334155;
     --accent-foreground: #FFFFFF;
-    --destructive: #C0392B;
+    --destructive: #DC2626;
     --destructive-foreground: #FFFFFF;
-    --border: transparent;
-    --input: transparent;
-    --ring: rgba(229, 125, 24, 0.22);
-    --radius: 18px;
+    --border: rgba(255, 255, 255, 0.4);
+    --input: rgba(255, 255, 255, 0.4);
+    --ring: rgba(51, 65, 85, 0.15);
+    --radius: 12px;
 
     --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;

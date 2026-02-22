@@ -25,7 +25,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectCountRef = useRef(0)
-  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // System message types that should not appear in the feed
   const SYSTEM_TYPES = new Set(["connected", "subscribed", "unsubscribed", "error", "ping", "pong"])

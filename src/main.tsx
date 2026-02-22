@@ -4,6 +4,7 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "@/components/theme-provider";
 import { KolSelectionProvider } from "@/hooks/use-kol-selection";
+import { InteractionConfigProvider } from "@/hooks/use-interaction-config";
 import "./index.css";
 
 const router = createRouter({ routeTree });
@@ -15,7 +16,9 @@ if (!rootElement.innerHTML) {
     <React.StrictMode>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <KolSelectionProvider>
-          <RouterProvider router={router} />
+          <InteractionConfigProvider>
+            <RouterProvider router={router} />
+          </InteractionConfigProvider>
         </KolSelectionProvider>
       </ThemeProvider>
     </React.StrictMode>

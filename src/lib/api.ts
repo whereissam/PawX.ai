@@ -1,5 +1,11 @@
 import axios from "axios"
-import type { TweetResponse, KolUser } from "@/types"
+import type {
+  TweetResponse,
+  KolUser,
+  LinkedInSearchParams,
+  LinkedInSearchResponse,
+  LinkedInProfile,
+} from "@/types"
 import { kols as mockKols } from "@/data/kols"
 
 const isDev = import.meta.env.DEV
@@ -35,6 +41,22 @@ export async function wsSubscribe(twitterUsername: string) {
 
 export async function wsUnsubscribe(twitterUsername: string) {
   const { data } = await api.post("/ws/unsubscribe", { twitterUsername })
+  return data
+}
+
+// ── LinkedIn API calls ──────────────────────────────────────────
+
+export async function searchLinkedIn(
+  params: LinkedInSearchParams
+): Promise<LinkedInSearchResponse> {
+  const { data } = await api.post("/search", params)
+  return data
+}
+
+export async function enrichProfiles(
+  usernames: string[]
+): Promise<LinkedInProfile[]> {
+  const { data } = await api.post("/enrich_profiles", { usernames })
   return data
 }
 

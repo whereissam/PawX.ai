@@ -128,3 +128,126 @@ export interface OutreachCampaign {
   totalCount: number
   createdAt: string
 }
+
+// --- LinkedIn Search ---
+export interface LinkedInSearchParams {
+  title: string
+  country?: string
+  company?: string
+  university?: string
+}
+
+export interface SearchResult {
+  title: string
+  link: string
+}
+
+export interface LinkedInSearchResponse {
+  items: SearchResult[]
+  usernames: (string | null)[]
+}
+
+// --- LinkedIn Enrich ---
+export interface LinkedInPosition {
+  jobTitle: string
+  company: string
+  location: string
+  duration: string
+  companyLink: string
+  companyId: string
+  jobDescription: string
+}
+
+export interface LinkedInEducation {
+  duration: string
+  university: string
+  universityLink: string
+  degree: string
+  description: string | null
+  subDescription: string | null
+  durationParsed?: { start: { year: number }; end: { year: number } }
+}
+
+export interface LinkedInSkill {
+  skillName: string
+  endorsementsCount: number
+  isPassedLinkedInSkillAssessment: boolean
+}
+
+export interface LinkedInExperiencePosition {
+  companyName: string
+  title: string
+  location: string
+  duration: string
+  description: string
+  durationParsed?: {
+    start: { year: number; month: number }
+    end: { year: number; month: number }
+    present: boolean
+    period: string
+  }
+}
+
+export interface LinkedInExperience {
+  companyName: string
+  companyLogo: string
+  companyLink: string
+  title: string
+  totalDuration: string
+  positions: LinkedInExperiencePosition[]
+  isMultiPositions: boolean
+}
+
+export interface LinkedInOverview {
+  firstName: string
+  lastName: string
+  fullName: string
+  headline: string
+  publicIdentifier: string
+  followerCount: number
+  connectionsCount: number
+  profilePictureURL?: string
+  profileID: string
+  CurrentPositions: { id: string; name: string; url: string; logoURL: string }[]
+  isTopVoice: boolean
+  premium: boolean
+  influencer: boolean
+}
+
+export interface LinkedInDetails {
+  about: string
+  positions: LinkedInPosition[]
+  education: LinkedInEducation[]
+  languages: { languages: { Language: string; Level: string }[] | null }
+}
+
+export interface LinkedInProfile {
+  username: string
+  overview: { success: boolean; statusCode: number; data: LinkedInOverview } | null
+  details: { success: boolean; statusCode: number; data: LinkedInDetails } | null
+  experience: {
+    success: boolean
+    statusCode: number
+    data: { experience: LinkedInExperience[] }
+  } | null
+  education: {
+    success: boolean
+    statusCode: number
+    data: { education: LinkedInEducation[] }
+  } | null
+  skills: {
+    success: boolean
+    statusCode: number
+    data: { skills: LinkedInSkill[] }
+  } | null
+}
+
+// --- Interaction Config ---
+export interface InteractionConfig {
+  styleMode: "describe" | "learn" | "preset"
+  stylePrompt: string
+  replyCondition: "all" | "conditional"
+  conditionPrompt: string
+  presetStyle?: string
+  twitterHandle?: string
+}

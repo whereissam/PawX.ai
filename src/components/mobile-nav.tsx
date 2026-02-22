@@ -41,11 +41,18 @@ export function MobileNav() {
                   KOL Directory
                 </Link>
                 <Link
+                  to="/configure"
+                  className="text-foreground hover:text-primary [&.active]:text-primary [&.active]:font-medium transition-colors py-3 text-base"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Configure
+                </Link>
+                <Link
                   to="/interact"
                   className="text-foreground hover:text-primary [&.active]:text-primary [&.active]:font-medium transition-colors py-3 text-base"
                   onClick={() => setIsOpen(false)}
                 >
-                  Interact
+                  Monitor
                 </Link>
                 <Link
                   to="/outreach"

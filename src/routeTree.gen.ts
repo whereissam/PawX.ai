@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OutreachRouteImport } from './routes/outreach'
 import { Route as InteractRouteImport } from './routes/interact'
+import { Route as ConfigureRouteImport } from './routes/configure'
 import { Route as IndexRouteImport } from './routes/index'
 
 const OutreachRoute = OutreachRouteImport.update({
@@ -23,6 +24,11 @@ const InteractRoute = InteractRouteImport.update({
   path: '/interact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfigureRoute = ConfigureRouteImport.update({
+  id: '/configure',
+  path: '/configure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/configure': typeof ConfigureRoute
   '/interact': typeof InteractRoute
   '/outreach': typeof OutreachRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/configure': typeof ConfigureRoute
   '/interact': typeof InteractRoute
   '/outreach': typeof OutreachRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/configure': typeof ConfigureRoute
   '/interact': typeof InteractRoute
   '/outreach': typeof OutreachRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/interact' | '/outreach'
+  fullPaths: '/' | '/configure' | '/interact' | '/outreach'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/interact' | '/outreach'
-  id: '__root__' | '/' | '/interact' | '/outreach'
+  to: '/' | '/configure' | '/interact' | '/outreach'
+  id: '__root__' | '/' | '/configure' | '/interact' | '/outreach'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConfigureRoute: typeof ConfigureRoute
   InteractRoute: typeof InteractRoute
   OutreachRoute: typeof OutreachRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InteractRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/configure': {
+      id: '/configure'
+      path: '/configure'
+      fullPath: '/configure'
+      preLoaderRoute: typeof ConfigureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConfigureRoute: ConfigureRoute,
   InteractRoute: InteractRoute,
   OutreachRoute: OutreachRoute,
 }

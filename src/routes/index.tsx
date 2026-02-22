@@ -4,21 +4,23 @@ import { PawXLogo } from "@/components/logo"
 import { KolFilterBar } from "@/components/kol/kol-filter-bar"
 import { KolGrid } from "@/components/kol/kol-grid"
 import { KolDetailDrawer } from "@/components/kol/kol-detail-drawer"
-import { CategorySummary } from "@/components/kol/category-summary"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useKolFilter } from "@/hooks/use-kol-filter"
 import { useKolSelection } from "@/hooks/use-kol-selection"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Search } from "lucide-react"
 import type { KolUser } from "@/types"
 
 function KolDirectoryPage() {
   const {
-    filters,
+    selectedCategories,
+    searchQuery,
+    searchApplied,
     filteredKols,
     hasActiveFilters,
-    toggleTag,
+    toggleCategory,
     setSearchQuery,
+    applySearch,
     clearFilters,
   } = useKolFilter()
 
@@ -35,6 +37,8 @@ function KolDirectoryPage() {
     setDetailKol(kol)
     setDrawerOpen(true)
   }
+
+  const showGrid = searchApplied || hasActiveFilters
 
   return (
     <div className="min-h-screen">
@@ -55,7 +59,7 @@ function KolDirectoryPage() {
           <div className="flex items-center gap-2 mb-4 p-2.5 sm:p-3 bg-surface shadow-raised-sm rounded-lg flex-wrap">
             <Badge variant="default">{selectedKolIds.size} selected</Badge>
             <span className="text-xs sm:text-sm text-muted-foreground">
-              Ready for interaction
+              Ready for configuration
             </span>
             <div className="ml-auto flex items-center gap-2">
               <button
@@ -64,9 +68,9 @@ function KolDirectoryPage() {
               >
                 Clear
               </button>
-              <Link to="/interact">
+              <Link to="/configure">
                 <Button size="sm" className="gap-1.5 text-xs">
-                  Go Interact
+                  Next
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
@@ -77,33 +81,40 @@ function KolDirectoryPage() {
         {/* Filters */}
         <div className="mb-4 sm:mb-6">
           <KolFilterBar
-            filters={filters}
-            onToggleTag={toggleTag}
+            selectedCategories={selectedCategories}
+            onToggleCategory={toggleCategory}
+            searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onClear={clearFilters}
+            onSearch={applySearch}
             hasActiveFilters={hasActiveFilters}
           />
         </div>
 
-        {/* Category Summary */}
-        <div className="mb-4 sm:mb-6">
-          <CategorySummary activeTags={filters.tags} />
-        </div>
-
-        {/* Results count */}
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <p className="text-sm text-muted-foreground">
-            {filteredKols.length} KOLs found
-          </p>
-        </div>
-
-        {/* KOL Grid */}
-        <KolGrid
-          kols={filteredKols}
-          selectedKolIds={selectedKolIds}
-          onToggleSelect={toggleKolSelection}
-          onViewDetail={handleViewDetail}
-        />
+        {/* KOL Grid - only shown after search */}
+        {showGrid ? (
+          <>
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <p className="text-sm text-muted-foreground">
+                {filteredKols.length} KOLs found
+              </p>
+            </div>
+            <KolGrid
+              kols={filteredKols}
+              selectedKolIds={selectedKolIds}
+              onToggleSelect={toggleKolSelection}
+              onViewDetail={handleViewDetail}
+            />
+          </>
+        ) : (
+          <div className="text-center py-16 sm:py-24 text-muted-foreground">
+            <Search className="h-12 w-12 mx-auto mb-4 opacity-30" />
+            <p className="text-sm font-medium">Select categories and press Search</p>
+            <p className="text-xs mt-1">
+              Choose filters above and hit Enter or the Search button to find KOLs
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Detail Drawer */}

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Radio, MessageSquare } from "lucide-react"
+import { Radio, MessageSquare, Check, Clock, Minus } from "lucide-react"
 import type { WsMessage } from "@/hooks/use-websocket"
 
 function timeAgo(timestamp: string): string {
@@ -19,12 +19,25 @@ interface LiveTweetCardProps {
 }
 
 export function LiveTweetCard({ message }: LiveTweetCardProps) {
-  const data = message.data as Record<string, unknown>
+  const data = message.data as Record<string, any>
 
-  // Try to extract tweet-like data from the WS message
   const text = (data?.text ?? data?.full_text ?? data?.message ?? JSON.stringify(data)) as string
-  const username = (data?.user?.screen_name ?? data?.username ?? data?.screen_name ?? "unknown") as string
-  const name = (data?.user?.name ?? data?.name ?? username) as string
+  const userObj = data?.user as Record<string, any> | undefined
+  const username = (userObj?.screen_name ?? data?.username ?? data?.screen_name ?? "unknown") as string
+  const name = (userObj?.name ?? data?.name ?? username) as string
+
+  // Simulate reply status: random for demo
+  const hash = message.id.charCodeAt(0) % 3
+  const replyStatus = hash === 0 ? "replied" : hash === 1 ? "pending" : "skipped"
+
+  const statusConfig = {
+    replied: { label: "Replied", color: "bg-green-500/10 text-green-700", icon: Check },
+    pending: { label: "Pending", color: "bg-yellow-500/10 text-yellow-700", icon: Clock },
+    skipped: { label: "Skipped", color: "bg-muted text-muted-foreground", icon: Minus },
+  }
+
+  const status = statusConfig[replyStatus]
+  const StatusIcon = status.icon
 
   return (
     <Card className="border-l-4 border-l-primary/60 animate-in slide-in-from-top-2 duration-300">
@@ -47,12 +60,30 @@ export function LiveTweetCard({ message }: LiveTweetCardProps) {
 
         <p className="text-sm leading-relaxed">{text}</p>
 
-        <div className="flex items-center gap-2 pt-1">
+        <div className="flex items-center justify-between pt-1">
           <Badge variant="secondary" className="text-xs gap-1">
             <MessageSquare className="h-3 w-3" />
             Auto-replying...
           </Badge>
+          <Badge className={`text-xs gap-1 ${status.color}`}>
+            <StatusIcon className="h-3 w-3" />
+            {status.label}
+          </Badge>
         </div>
+
+        {replyStatus === "replied" && (
+          <div className="ml-4 p-2.5 bg-surface-2/50 rounded-md border-l-2 border-green-500/50">
+            <p className="text-xs text-muted-foreground">
+              Great point! The on-chain metrics confirm this trend.
+            </p>
+          </div>
+        )}
+
+        {replyStatus === "skipped" && (
+          <p className="text-xs text-muted-foreground ml-4">
+            Reason: Does not match reply conditions
+          </p>
+        )}
       </CardContent>
     </Card>
   )

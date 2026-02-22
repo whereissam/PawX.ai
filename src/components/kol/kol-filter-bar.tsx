@@ -2,29 +2,47 @@ import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { KOL_TAGS } from "@/data/tags"
+import { KOL_CATEGORIES, CATEGORY_LABELS } from "@/data/tags"
 import { Search, X, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { FilterState } from "@/types"
 
 interface KolFilterBarProps {
-  filters: FilterState
-  onToggleTag: (tag: string) => void
+  selectedCategories: Record<string, string[]>
+  onToggleCategory: (category: string, value: string) => void
+  searchQuery: string
   onSearchChange: (query: string) => void
   onClear: () => void
+  onSearch: () => void
   hasActiveFilters: boolean
 }
 
 export function KolFilterBar({
-  filters,
-  onToggleTag,
+  selectedCategories,
+  onToggleCategory,
+  searchQuery,
   onSearchChange,
   onClear,
+  onSearch,
   hasActiveFilters,
 }: KolFilterBarProps) {
-  const [filtersExpanded, setFiltersExpanded] = useState(true)
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    Language: true,
+    Ecosystem: true,
+    user_type: true,
+  })
 
-  const activeCount = filters.tags.length
+  const totalActive = Object.values(selectedCategories).reduce(
+    (sum, arr) => sum + arr.length,
+    0
+  )
+
+  const toggleSection = (key: string) => {
+    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") onSearch()
+  }
 
   return (
     <div className="space-y-3">
@@ -33,60 +51,80 @@ export function KolFilterBar({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search KOLs..."
-            value={filters.searchQuery}
+            value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="pl-9"
           />
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setFiltersExpanded(!filtersExpanded)}
-          className="sm:hidden shrink-0"
-        >
-          {activeCount > 0 && (
-            <span className="bg-primary text-primary-foreground rounded-full h-4 w-4 text-xs flex items-center justify-center mr-1">
-              {activeCount}
-            </span>
-          )}
-          Filters
-          {filtersExpanded ? (
-            <ChevronUp className="h-3 w-3 ml-1" />
-          ) : (
-            <ChevronDown className="h-3 w-3 ml-1" />
-          )}
+        <Button size="sm" onClick={onSearch} className="shrink-0">
+          Search
         </Button>
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={onClear} className="text-muted-foreground shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClear}
+            className="text-muted-foreground shrink-0"
+          >
             <X className="h-4 w-4 mr-1" />
             <span className="hidden sm:inline">Clear</span>
           </Button>
         )}
       </div>
 
-      <div className={cn(
-        "space-y-2 overflow-hidden transition-all",
-        filtersExpanded ? "max-h-96" : "max-h-0 sm:max-h-96"
-      )}>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
-          <span className="text-xs font-medium text-muted-foreground sm:w-16 shrink-0">Tags</span>
-          <div className="flex gap-1.5 flex-wrap">
-            {KOL_TAGS.map((tag) => (
-              <Badge
-                key={tag.value}
-                variant={filters.tags.includes(tag.value) ? "default" : "outline"}
-                className={cn(
-                  "cursor-pointer text-xs transition-colors",
-                  filters.tags.includes(tag.value) && "bg-primary text-primary-foreground"
-                )}
-                onClick={() => onToggleTag(tag.value)}
-              >
-                {tag.label}
-              </Badge>
-            ))}
+      {Object.entries(KOL_CATEGORIES).map(([category, values]) => {
+        const isExpanded = expandedSections[category]
+        const selectedCount = (selectedCategories[category] ?? []).length
+
+        return (
+          <div key={category} className="space-y-1.5">
+            <button
+              onClick={() => toggleSection(category)}
+              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors w-full"
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
+              {CATEGORY_LABELS[category] ?? category}
+              {selectedCount > 0 && (
+                <span className="bg-primary text-primary-foreground rounded-full h-4 w-4 text-[10px] flex items-center justify-center ml-1">
+                  {selectedCount}
+                </span>
+              )}
+            </button>
+
+            {isExpanded && (
+              <div className="flex gap-1.5 flex-wrap pl-4">
+                {values.map((value) => {
+                  const isSelected = (selectedCategories[category] ?? []).includes(value)
+                  return (
+                    <Badge
+                      key={value}
+                      variant={isSelected ? "default" : "outline"}
+                      className={cn(
+                        "cursor-pointer text-xs transition-colors",
+                        isSelected && "bg-primary text-primary-foreground"
+                      )}
+                      onClick={() => onToggleCategory(category, value)}
+                    >
+                      {value}
+                    </Badge>
+                  )
+                })}
+              </div>
+            )}
           </div>
-        </div>
-      </div>
+        )
+      })}
+
+      {totalActive > 0 && (
+        <p className="text-xs text-muted-foreground">
+          {totalActive} filter{totalActive !== 1 ? "s" : ""} active — press Search or Enter to apply
+        </p>
+      )}
     </div>
   )
 }

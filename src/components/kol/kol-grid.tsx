@@ -4,7 +4,7 @@ import type { KolUser } from "@/types"
 interface KolGridProps {
   kols: KolUser[]
   selectedKolIds: Set<string>
-  onToggleSelect: (id: string) => void
+  onToggleSelect: (kol: KolUser) => void
   onViewDetail: (kol: KolUser) => void
 }
 

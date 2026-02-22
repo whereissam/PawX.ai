@@ -6,7 +6,8 @@ import { ExternalLink, Users, UserPlus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { KolUser } from "@/types"
 
-function formatNumber(n: number): string {
+function formatNumber(n: number | null | undefined): string {
+  if (n == null) return "0"
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
   return n.toString()
@@ -15,7 +16,7 @@ function formatNumber(n: number): string {
 interface KolCardProps {
   kol: KolUser
   isSelected: boolean
-  onToggleSelect: (id: string) => void
+  onToggleSelect: (kol: KolUser) => void
   onViewDetail: (kol: KolUser) => void
 }
 
@@ -33,11 +34,11 @@ export function KolCard({ kol, isSelected, onToggleSelect, onViewDetail }: KolCa
             className="relative shrink-0"
             onClick={(e) => {
               e.stopPropagation()
-              onToggleSelect(kol.id)
+              onToggleSelect(kol)
             }}
           >
             <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-              <AvatarImage src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`} alt={kol.name} />
+              <AvatarImage src={kol.profileImageUrlHttps?.replace("_normal", "_bigger") ?? `https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`} alt={kol.name} />
               <AvatarFallback>{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div

@@ -17,5 +17,22 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
-  }
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://pawx-social-assistant.onrender.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: true,
+        timeout: 60000,
+      },
+      '/ws': {
+        target: 'wss://pawx-social-assistant.onrender.com',
+        changeOrigin: true,
+        ws: true,
+        secure: true,
+      },
+    },
+  },
 });

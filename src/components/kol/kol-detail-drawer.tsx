@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import {
   Sheet,
   SheetContent,
@@ -7,11 +8,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { TagBadge } from "@/components/tag-badge"
 import { Button } from "@/components/ui/button"
-import { Users, UserPlus, MapPin, Globe, Eye } from "lucide-react"
-import { tweetResponses } from "@/data/tweets"
-import type { KolUser } from "@/types"
+import { Users, UserPlus, MapPin, Globe, Eye, Loader2 } from "lucide-react"
+import { getTweetsInfo } from "@/lib/api"
+import type { KolUser, Tweet } from "@/types"
 
-function formatNumber(n: number): string {
+function formatNumber(n: number | null | undefined): string {
+  if (n == null) return "0"
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
   return n.toString()
@@ -19,8 +21,10 @@ function formatNumber(n: number): string {
 
 function timeAgo(timestamp: string): string {
   const diff = Date.now() - new Date(timestamp).getTime()
-  const hours = Math.floor(diff / (1000 * 60 * 60))
-  if (hours < 1) return "just now"
+  const minutes = Math.floor(diff / (1000 * 60))
+  if (minutes < 1) return "just now"
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
   if (hours < 24) return `${hours}h ago`
   const days = Math.floor(hours / 24)
   return `${days}d ago`
@@ -31,7 +35,7 @@ interface KolDetailDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   isSelected: boolean
-  onToggleSelect: (id: string) => void
+  onToggleSelect: (kol: KolUser) => void
 }
 
 export function KolDetailDrawer({
@@ -41,11 +45,36 @@ export function KolDetailDrawer({
   isSelected,
   onToggleSelect,
 }: KolDetailDrawerProps) {
+  const [tweets, setTweets] = useState<Tweet[]>([])
+  const [loadingTweets, setLoadingTweets] = useState(false)
+
+  useEffect(() => {
+    if (!kol || !open) return
+    let cancelled = false
+
+    async function loadTweets() {
+      setLoadingTweets(true)
+      try {
+        const data = await getTweetsInfo([kol!.screenName])
+        if (!cancelled) {
+          setTweets(data.map((r) => r.tweet).slice(0, 10))
+        }
+      } catch {
+        // Keep empty on error
+      } finally {
+        if (!cancelled) setLoadingTweets(false)
+      }
+    }
+
+    loadTweets()
+    return () => { cancelled = true }
+  }, [kol, open])
+
   if (!kol) return null
 
-  const kolTweets = tweetResponses
-    .filter((r) => r.user.id === kol.id)
-    .map((r) => r.tweet)
+  const avatarSrc = kol.profileImageUrlHttps
+    ? kol.profileImageUrlHttps.replace("_normal", "_bigger")
+    : `https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -53,7 +82,7 @@ export function KolDetailDrawer({
         <SheetHeader>
           <div className="flex items-start gap-3 sm:gap-4">
             <Avatar className="h-12 w-12 sm:h-16 sm:w-16">
-              <AvatarImage src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`} alt={kol.name} />
+              <AvatarImage src={avatarSrc} alt={kol.name} />
               <AvatarFallback>{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -75,7 +104,7 @@ export function KolDetailDrawer({
         </SheetHeader>
 
         <div className="mt-4 space-y-5">
-          <p className="text-sm">{kol.description}</p>
+          {kol.description && <p className="text-sm">{kol.description}</p>}
 
           <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -97,40 +126,45 @@ export function KolDetailDrawer({
                 {kol.location}
               </span>
             )}
-            {kol.website && (
-              <a
-                href={kol.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-primary hover:underline"
-              >
-                <Globe className="h-3 w-3" />
-                Website
-              </a>
-            )}
+            <a
+              href={`https://x.com/${kol.screenName}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-primary hover:underline"
+            >
+              <Globe className="h-3 w-3" />
+              @{kol.screenName}
+            </a>
           </div>
 
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Tags</h4>
-            <div className="flex flex-wrap gap-1">
-              {kol.tags.map((tag) => (
-                <TagBadge key={tag} tag={tag} />
-              ))}
+          {kol.tags.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Tags</h4>
+              <div className="flex flex-wrap gap-1">
+                {kol.tags.map((tag) => (
+                  <TagBadge key={tag} tag={tag} />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <Button
             variant={isSelected ? "secondary" : "default"}
             className="w-full"
-            onClick={() => onToggleSelect(kol.id)}
+            onClick={() => onToggleSelect(kol)}
           >
             {isSelected ? "Remove from Selection" : "Select for Interaction"}
           </Button>
 
-          {kolTweets.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Recent Tweets</h4>
-              {kolTweets.map((tweet) => (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Recent Tweets</h4>
+            {loadingTweets ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-sm text-muted-foreground">Loading tweets...</span>
+              </div>
+            ) : tweets.length > 0 ? (
+              tweets.map((tweet) => (
                 <div key={tweet.id} className="p-3 sm:p-4 bg-surface-2 rounded-md shadow-neu-inset space-y-2">
                   <p className="text-sm">{tweet.text}</p>
                   <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
@@ -144,9 +178,13 @@ export function KolDetailDrawer({
                     <span className="sm:ml-auto">{timeAgo(tweet.createdAt)}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No recent tweets found
+              </p>
+            )}
+          </div>
         </div>
       </SheetContent>
     </Sheet>

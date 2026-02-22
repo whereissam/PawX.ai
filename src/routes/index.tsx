@@ -1,26 +1,32 @@
 import { useState } from "react"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { PawXLogo } from "@/components/logo"
 import { KolFilterBar } from "@/components/kol/kol-filter-bar"
 import { KolGrid } from "@/components/kol/kol-grid"
 import { KolDetailDrawer } from "@/components/kol/kol-detail-drawer"
 import { CategorySummary } from "@/components/kol/category-summary"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { useKolFilter } from "@/hooks/use-kol-filter"
+import { useKolSelection } from "@/hooks/use-kol-selection"
+import { ArrowRight } from "lucide-react"
 import type { KolUser } from "@/types"
 
 function KolDirectoryPage() {
   const {
     filters,
     filteredKols,
-    selectedKolIds,
     hasActiveFilters,
     toggleTag,
     setSearchQuery,
     clearFilters,
+  } = useKolFilter()
+
+  const {
+    selectedKolIds,
     toggleKolSelection,
     clearSelection,
-  } = useKolFilter()
+  } = useKolSelection()
 
   const [detailKol, setDetailKol] = useState<KolUser | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -51,12 +57,20 @@ function KolDirectoryPage() {
             <span className="text-xs sm:text-sm text-muted-foreground">
               Ready for interaction
             </span>
-            <button
-              onClick={clearSelection}
-              className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Clear
-            </button>
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={clearSelection}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Clear
+              </button>
+              <Link to="/interact">
+                <Button size="sm" className="gap-1.5 text-xs">
+                  Go Interact
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
 

@@ -1,24 +1,67 @@
 import axios from "axios"
 import type { TweetResponse, KolUser } from "@/types"
-import { tweetResponses } from "@/data/tweets"
-import { kols } from "@/data/kols"
+import { kols as mockKols } from "@/data/kols"
+
+const isDev = import.meta.env.DEV
+const API_BASE = isDev ? "/api" : "https://pawx-social-assistant.onrender.com"
 
 const api = axios.create({
-  baseURL: "https://api.example.com", // placeholder — swap when API is ready
-  timeout: 10000,
+  baseURL: API_BASE,
+  timeout: 60000,
 })
 
-export async function fetchTweets(): Promise<TweetResponse[]> {
-  // TODO: swap to real API call when endpoint is ready
-  // const { data } = await api.get<TweetResponse[]>("/tweets")
-  // return data
-  void api // suppress unused warning
-  return Promise.resolve(tweetResponses)
+// ── Real API calls ──────────────────────────────────────────────
+
+/** Get user profiles (avatar, followers, etc.) */
+export async function getUserInfo(screenNames: string[]): Promise<KolUser[]> {
+  const { data } = await api.get("/user_info", {
+    params: { screen_names: screenNames.join(",") },
+  })
+  return data
 }
 
+/** Get tweets for specific users — backend handles date ranges */
+export async function getTweetsInfo(screenNames: string[]): Promise<TweetResponse[]> {
+  const { data } = await api.get("/tweets_info", {
+    params: { screen_names: screenNames.join(",") },
+  })
+  return data
+}
+
+export async function wsSubscribe(twitterUsername: string) {
+  const { data } = await api.post("/ws/subscribe", { twitterUsername })
+  return data
+}
+
+export async function wsUnsubscribe(twitterUsername: string) {
+  const { data } = await api.post("/ws/unsubscribe", { twitterUsername })
+  return data
+}
+
+// ── WebSocket URL ───────────────────────────────────────────────
+
+export const WS_URL = isDev
+  ? `ws://${window.location.host}/ws`
+  : "wss://pawx-social-assistant.onrender.com/ws"
+
+// ── Fetch KOL profiles from real API, fallback to mock ──────────
+
 export async function fetchKols(): Promise<KolUser[]> {
-  // TODO: swap to real API call when endpoint is ready
-  // const { data } = await api.get<KolUser[]>("/kols")
-  // return data
-  return Promise.resolve(kols)
+  try {
+    const screenNames = mockKols.map((k) => k.screenName)
+    const data = await getUserInfo(screenNames)
+    // Merge tags from mock data (real API doesn't return tags)
+    return data.map((user) => {
+      const mock = mockKols.find(
+        (k) => k.screenName.toLowerCase() === user.screenName.toLowerCase()
+      )
+      return {
+        ...user,
+        tags: mock?.tags ?? [],
+        description: user.description || mock?.description || "",
+      }
+    })
+  } catch {
+    return mockKols
+  }
 }

@@ -5,7 +5,8 @@ import { MessageSquare, Heart, Repeat2, ArrowRight, Eye } from "lucide-react"
 import { kols } from "@/data/kols"
 import type { Interaction } from "@/types"
 
-function formatNumber(n: number): string {
+function formatNumber(n: number | null | undefined): string {
+  if (n == null) return "0"
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
   return n.toString()

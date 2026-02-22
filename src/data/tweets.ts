@@ -158,7 +158,7 @@ export const tweetResponses: TweetResponse[] = [
     user: {
       id: "902926941413453824",
       name: "CZ",
-      screenName: "caboringz",
+      screenName: "cz_binance",
       location: "Decentralized",
       description: "Farmer. Former CEO of Binance. Building for the future of crypto.",
       website: "https://binance.com",
@@ -186,7 +186,7 @@ export const tweetResponses: TweetResponse[] = [
     user: {
       id: "902926941413453824",
       name: "CZ",
-      screenName: "caboringz",
+      screenName: "cz_binance",
       location: "Decentralized",
       description: "Farmer. Former CEO of Binance. Building for the future of crypto.",
       website: "https://binance.com",
@@ -214,7 +214,7 @@ export const tweetResponses: TweetResponse[] = [
     user: {
       id: "902926941413453824",
       name: "CZ",
-      screenName: "caboringz",
+      screenName: "cz_binance",
       location: "Decentralized",
       description: "Farmer. Former CEO of Binance. Building for the future of crypto.",
       website: "https://binance.com",
@@ -242,7 +242,7 @@ export const tweetResponses: TweetResponse[] = [
     user: {
       id: "902926941413453824",
       name: "CZ",
-      screenName: "caboringz",
+      screenName: "cz_binance",
       location: "Decentralized",
       description: "Farmer. Former CEO of Binance. Building for the future of crypto.",
       website: "https://binance.com",
@@ -270,7 +270,7 @@ export const tweetResponses: TweetResponse[] = [
     user: {
       id: "902926941413453824",
       name: "CZ",
-      screenName: "caboringz",
+      screenName: "cz_binance",
       location: "Decentralized",
       description: "Farmer. Former CEO of Binance. Building for the future of crypto.",
       website: "https://binance.com",
@@ -326,7 +326,7 @@ export const tweetResponses: TweetResponse[] = [
     user: {
       id: "902926941413453824",
       name: "CZ",
-      screenName: "caboringz",
+      screenName: "cz_binance",
       location: "Decentralized",
       description: "Farmer. Former CEO of Binance. Building for the future of crypto.",
       website: "https://binance.com",
@@ -382,7 +382,7 @@ export const tweetResponses: TweetResponse[] = [
     user: {
       id: "902926941413453824",
       name: "CZ",
-      screenName: "caboringz",
+      screenName: "cz_binance",
       location: "Decentralized",
       description: "Farmer. Former CEO of Binance. Building for the future of crypto.",
       website: "https://binance.com",
@@ -438,7 +438,7 @@ export const tweetResponses: TweetResponse[] = [
     user: {
       id: "902926941413453824",
       name: "CZ",
-      screenName: "caboringz",
+      screenName: "cz_binance",
       location: "Decentralized",
       description: "Farmer. Former CEO of Binance. Building for the future of crypto.",
       website: "https://binance.com",

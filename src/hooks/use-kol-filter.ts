@@ -1,6 +1,7 @@
-import { useState, useMemo, useCallback } from "react"
-import type { FilterState } from "@/types"
-import { kols } from "@/data/kols"
+import { useState, useMemo, useCallback, useEffect } from "react"
+import type { FilterState, KolUser } from "@/types"
+import { kols as mockKols } from "@/data/kols"
+import { fetchKols } from "@/lib/api"
 
 const initialFilter: FilterState = {
   tags: [],
@@ -9,7 +10,24 @@ const initialFilter: FilterState = {
 
 export function useKolFilter() {
   const [filters, setFilters] = useState<FilterState>(initialFilter)
-  const [selectedKolIds, setSelectedKolIds] = useState<Set<string>>(new Set())
+  const [kols, setKols] = useState<KolUser[]>(mockKols)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      setIsLoading(true)
+      const data = await fetchKols()
+      if (!cancelled) {
+        setKols(data)
+        setIsLoading(false)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [])
 
   const toggleTag = useCallback((tag: string) => {
     setFilters((prev) => ({
@@ -26,22 +44,6 @@ export function useKolFilter() {
 
   const clearFilters = useCallback(() => {
     setFilters(initialFilter)
-  }, [])
-
-  const toggleKolSelection = useCallback((kolId: string) => {
-    setSelectedKolIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(kolId)) {
-        next.delete(kolId)
-      } else {
-        next.add(kolId)
-      }
-      return next
-    })
-  }, [])
-
-  const clearSelection = useCallback(() => {
-    setSelectedKolIds(new Set())
   }, [])
 
   const filteredKols = useMemo(() => {
@@ -62,11 +64,7 @@ export function useKolFilter() {
       }
       return true
     })
-  }, [filters])
-
-  const selectedKols = useMemo(() => {
-    return kols.filter((kol) => selectedKolIds.has(kol.id))
-  }, [selectedKolIds])
+  }, [filters, kols])
 
   const hasActiveFilters =
     filters.tags.length > 0 ||
@@ -75,13 +73,10 @@ export function useKolFilter() {
   return {
     filters,
     filteredKols,
-    selectedKolIds,
-    selectedKols,
+    isLoading,
     hasActiveFilters,
     toggleTag,
     setSearchQuery,
     clearFilters,
-    toggleKolSelection,
-    clearSelection,
   }
 }

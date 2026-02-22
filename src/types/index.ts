@@ -69,6 +69,14 @@ export interface KolUser {
   kolFollowersCount: number
   isKol: boolean
   tags: string[]
+  // Fields from real API
+  profileImageUrlHttps?: string
+  profileBannerUrl?: string
+  verified?: boolean
+  createdAt?: string
+  favouritesCount?: number
+  statusesCount?: number
+  mediaCount?: number
 }
 
 // API response item: { tweet, user }

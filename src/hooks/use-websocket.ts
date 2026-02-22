@@ -27,6 +27,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const reconnectCountRef = useRef(0)
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
+  // System message types that should not appear in the feed
+  const SYSTEM_TYPES = new Set(["connected", "subscribed", "unsubscribed", "error", "ping", "pong"])
+
   const [status, setStatus] = useState<WsStatus>("disconnected")
   const [messages, setMessages] = useState<WsMessage[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -52,22 +55,26 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     ws.onmessage = (event) => {
       try {
         const parsed = JSON.parse(event.data)
+        const msgType = parsed.type ?? "tweet"
+
+        // Skip system messages — only feed real tweet data
+        if (SYSTEM_TYPES.has(msgType)) {
+          // Use "connected" to confirm ws status
+          if (msgType === "connected") {
+            setStatus("connected")
+          }
+          return
+        }
+
         const msg: WsMessage = {
           id: crypto.randomUUID(),
-          type: parsed.type ?? "tweet",
+          type: msgType,
           data: parsed,
           receivedAt: new Date().toISOString(),
         }
         setMessages((prev) => [msg, ...prev])
       } catch {
-        // Non-JSON message — wrap as raw
-        const msg: WsMessage = {
-          id: crypto.randomUUID(),
-          type: "raw",
-          data: event.data,
-          receivedAt: new Date().toISOString(),
-        }
-        setMessages((prev) => [msg, ...prev])
+        // Non-JSON — ignore system pings
       }
     }
 

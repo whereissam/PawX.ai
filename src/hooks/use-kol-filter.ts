@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react"
 import type { KolUser } from "@/types"
-import { filterKols, mapFilterResultToKolUser } from "@/lib/api"
+import { filterKols, mapFilterResultToKolUser, getTweetsInfo } from "@/lib/api"
 
 export function useKolFilter() {
   const [selectedCategories, setSelectedCategories] = useState<Record<string, string[]>>({})
@@ -46,6 +46,33 @@ export function useKolFilter() {
       })
 
       let kols = results.map(mapFilterResultToKolUser)
+
+      // Fetch profile images from tweets_info API (response includes user data)
+      const screenNames = kols.map((k) => k.screenName)
+      if (screenNames.length > 0) {
+        try {
+          const tweetsData = await getTweetsInfo(screenNames)
+          const profileMap = new Map<string, typeof tweetsData[number]["user"]>()
+          for (const item of tweetsData) {
+            if (item.user?.screenName) {
+              profileMap.set(item.user.screenName.toLowerCase(), item.user)
+            }
+          }
+          kols = kols.map((kol) => {
+            const profile = profileMap.get(kol.screenName.toLowerCase())
+            if (profile?.profileImageUrlHttps) {
+              return {
+                ...kol,
+                name: profile.name || kol.name,
+                profileImageUrlHttps: profile.profileImageUrlHttps,
+              }
+            }
+            return kol
+          })
+        } catch {
+          // Profile images are non-critical, continue without them
+        }
+      }
 
       // Client-side text search on top of API results
       if (searchQuery.trim()) {

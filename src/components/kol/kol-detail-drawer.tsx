@@ -8,9 +8,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { TagBadge } from "@/components/tag-badge"
 import { Button } from "@/components/ui/button"
-import { Users, UserPlus, MapPin, Globe, Eye, Loader2 } from "lucide-react"
+import {
+  Users,
+  UserPlus,
+  MapPin,
+  Globe,
+  Loader2,
+  MessageCircle,
+  Repeat2,
+  Heart,
+  Bookmark,
+  Quote,
+  BarChart3,
+} from "lucide-react"
 import { getTweetsInfo } from "@/lib/api"
-import type { KolUser, Tweet } from "@/types"
+import type { KolUser, Tweet, TweetResponse } from "@/types"
 
 function formatNumber(n: number | null | undefined): string {
   if (n == null) return "0"
@@ -19,15 +31,9 @@ function formatNumber(n: number | null | undefined): string {
   return n.toString()
 }
 
-function timeAgo(timestamp: string): string {
-  const diff = Date.now() - new Date(timestamp).getTime()
-  const minutes = Math.floor(diff / (1000 * 60))
-  if (minutes < 1) return "just now"
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  return `${days}d ago`
+function formatDate(timestamp: string): string {
+  const date = new Date(timestamp)
+  return date.toLocaleString()
 }
 
 interface KolDetailDrawerProps {
@@ -45,7 +51,7 @@ export function KolDetailDrawer({
   isSelected,
   onToggleSelect,
 }: KolDetailDrawerProps) {
-  const [tweets, setTweets] = useState<Tweet[]>([])
+  const [tweetResponses, setTweetResponses] = useState<TweetResponse[]>([])
   const [loadingTweets, setLoadingTweets] = useState(false)
 
   useEffect(() => {
@@ -57,7 +63,7 @@ export function KolDetailDrawer({
       try {
         const data = await getTweetsInfo([kol!.screenName])
         if (!cancelled) {
-          setTweets(data.map((r) => r.tweet).slice(0, 10))
+          setTweetResponses(data.slice(0, 10))
         }
       } catch {
         // Keep empty on error
@@ -163,21 +169,54 @@ export function KolDetailDrawer({
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 <span className="ml-2 text-sm text-muted-foreground">Loading tweets...</span>
               </div>
-            ) : tweets.length > 0 ? (
-              tweets.map((tweet) => (
-                <div key={tweet.id} className="p-3 sm:p-4 bg-surface-2 rounded-md shadow-neu-inset space-y-2">
-                  <p className="text-sm">{tweet.text}</p>
-                  <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground flex-wrap">
-                    <span>{formatNumber(tweet.favoriteCount)} likes</span>
-                    <span>{formatNumber(tweet.retweetCount)} RT</span>
-                    <span>{formatNumber(tweet.replyCount)} replies</span>
-                    <span className="flex items-center gap-0.5">
-                      <Eye className="h-3 w-3" />
-                      {formatNumber(tweet.viewCount)}
-                    </span>
-                    <span className="sm:ml-auto">{timeAgo(tweet.createdAt)}</span>
+            ) : tweetResponses.length > 0 ? (
+              tweetResponses.map(({ tweet, user }) => (
+                  <div key={tweet.id} className="p-3 sm:p-4 bg-surface-2 rounded-lg shadow-neu-inset space-y-2.5">
+                    {/* Header: avatar + name + handle + date */}
+                    <div className="flex items-center gap-2.5">
+                      <Avatar className="h-9 w-9 shrink-0">
+                        <AvatarImage src={avatarSrc} alt={kol.name} />
+                        <AvatarFallback className="text-xs">{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex items-center gap-1.5 min-w-0 text-sm">
+                        <span className="font-semibold truncate">{kol.name}</span>
+                        <span className="text-muted-foreground truncate">@{kol.screenName}</span>
+                        <span className="text-muted-foreground shrink-0">·</span>
+                        <span className="text-muted-foreground shrink-0 text-xs">{formatDate(tweet.createdAt)}</span>
+                      </div>
+                    </div>
+
+                    {/* Tweet text */}
+                    <p className="text-sm leading-relaxed">{tweet.text}</p>
+
+                    {/* Engagement metrics with icons */}
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                      <span className="flex items-center gap-1">
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        {formatNumber(tweet.replyCount)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Repeat2 className="h-3.5 w-3.5" />
+                        {formatNumber(tweet.retweetCount)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Heart className="h-3.5 w-3.5" />
+                        {formatNumber(tweet.favoriteCount)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Bookmark className="h-3.5 w-3.5" />
+                        {formatNumber(tweet.bookmarkCount)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Quote className="h-3.5 w-3.5" />
+                        {formatNumber(tweet.quoteCount)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <BarChart3 className="h-3.5 w-3.5" />
+                        {formatNumber(tweet.viewCount)}
+                      </span>
+                    </div>
                   </div>
-                </div>
               ))
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">

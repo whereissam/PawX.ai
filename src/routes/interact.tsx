@@ -3,6 +3,12 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { InteractionFeed } from "@/components/interact/interaction-feed"
 import {
   Play,
@@ -12,6 +18,8 @@ import {
   Radio,
   AlertCircle,
   Settings,
+  ChevronDown,
+  Users,
 } from "lucide-react"
 import { mockInteractions } from "@/data/tweets"
 import { wsSubscribe, wsUnsubscribe } from "@/lib/api"
@@ -147,9 +155,43 @@ function InteractPage() {
                   </Badge>
                 )}
                 {selectedKols.length > 0 && (
-                  <Badge variant="default" className="text-xs">
-                    {selectedKols.length} KOL{selectedKols.length !== 1 ? "s" : ""}
-                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 py-1 text-xs font-medium hover:bg-primary/90 transition-colors">
+                        <Users className="h-3 w-3" />
+                        {selectedKols.length} KOL{selectedKols.length !== 1 ? "s" : ""}
+                        <ChevronDown className="h-3 w-3" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-64 p-2 max-h-72 overflow-y-auto">
+                      <p className="text-xs font-medium text-muted-foreground px-2 pb-2">
+                        Monitoring {selectedKols.length} account{selectedKols.length !== 1 ? "s" : ""}
+                      </p>
+                      {selectedKols.map((kol) => {
+                        const src = kol.profileImageUrlHttps
+                          ? kol.profileImageUrlHttps.replace("_normal", "_bigger")
+                          : `https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`
+                        return (
+                          <a
+                            key={kol.id}
+                            href={`https://x.com/${kol.screenName}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-muted transition-colors"
+                          >
+                            <Avatar className="h-7 w-7 shrink-0">
+                              <AvatarImage src={src} alt={kol.name} />
+                              <AvatarFallback className="text-[10px]">{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{kol.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">@{kol.screenName}</p>
+                            </div>
+                          </a>
+                        )
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </div>
             </div>

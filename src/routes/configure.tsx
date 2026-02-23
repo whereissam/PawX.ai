@@ -17,6 +17,8 @@ import {
 } from "lucide-react"
 import { useKolSelection } from "@/hooks/use-kol-selection"
 import { useInteractionConfig } from "@/hooks/use-interaction-config"
+import { getTweetsInfo } from "@/lib/api"
+import { analyzeTwitterStyle, generateSampleReplies } from "@/lib/gemini"
 
 const PRESET_STYLES = [
   {
@@ -41,12 +43,6 @@ const PRESET_STYLES = [
   },
 ]
 
-const SAMPLE_REPLIES = [
-  "Great insight! The on-chain data supports this thesis — TVL has been steadily climbing.",
-  "gm ser! This is exactly the alpha we needed. Building in the bear market pays off.",
-  "Interesting take. Looking at the macro factors, I think we'll see more consolidation before a breakout.",
-]
-
 function ConfigurePage() {
   const navigate = useNavigate()
   const { selectedKols } = useKolSelection()
@@ -56,19 +52,32 @@ function ConfigurePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showSamples, setShowSamples] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [sampleReplies, setSampleReplies] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  const handleAnalyzeHandle = useCallback(() => {
+  const handleAnalyzeHandle = useCallback(async () => {
     if (!twitterHandle.trim()) return
     setIsAnalyzing(true)
+    setError(null)
     const handle = twitterHandle.startsWith("@") ? twitterHandle : `@${twitterHandle}`
-    setTimeout(() => {
+    const screenName = handle.replace("@", "")
+    try {
+      const tweetsData = await getTweetsInfo([screenName])
+      const tweetTexts = tweetsData.map((t) => t.tweet.text || t.tweet.fullText).filter(Boolean)
+      if (tweetTexts.length === 0) {
+        throw new Error("No tweets found for this handle")
+      }
+      const styleAnalysis = await analyzeTwitterStyle(tweetTexts)
       updateConfig({
         styleMode: "learn",
         twitterHandle: handle,
-        stylePrompt: `Reply in a casual, witty crypto-native tone learned from ${handle}. Use similar vocabulary and energy. Keep replies concise and engaging.`,
+        stylePrompt: styleAnalysis,
       })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to analyze tweets")
+    } finally {
       setIsAnalyzing(false)
-    }, 1500)
+    }
   }, [twitterHandle, updateConfig])
 
   const handlePresetSelect = useCallback(
@@ -84,13 +93,19 @@ function ConfigurePage() {
     [updateConfig]
   )
 
-  const handleGenerateSamples = useCallback(() => {
+  const handleGenerateSamples = useCallback(async () => {
     setIsGenerating(true)
-    setTimeout(() => {
+    setError(null)
+    try {
+      const replies = await generateSampleReplies(config.stylePrompt)
+      setSampleReplies(replies)
       setShowSamples(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate samples")
+    } finally {
       setIsGenerating(false)
-    }, 1000)
-  }, [])
+    }
+  }, [config.stylePrompt])
 
   const handleStart = () => {
     navigate({ to: "/interact" })
@@ -318,9 +333,13 @@ function ConfigurePage() {
                 </p>
               )}
 
+              {error && (
+                <p className="text-xs text-destructive text-center py-2">{error}</p>
+              )}
+
               {showSamples && (
                 <div className="space-y-2">
-                  {SAMPLE_REPLIES.map((reply, i) => (
+                  {sampleReplies.map((reply, i) => (
                     <div
                       key={i}
                       className="p-3 bg-surface-2/50 rounded-lg"

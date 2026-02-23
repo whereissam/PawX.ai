@@ -1,7 +1,6 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { MobileNav } from '@/components/mobile-nav'
-import { PawXLogo } from '@/components/logo'
 
 export const Route = createRootRoute({
   component: () => (
@@ -14,7 +13,7 @@ export const Route = createRootRoute({
                 to="/"
                 className="flex items-center gap-1.5 sm:gap-2 text-base sm:text-lg font-bold text-foreground hover:text-primary transition-colors"
               >
-                <PawXLogo className="h-6 w-6 sm:h-7 sm:w-7" />
+                <img src="/pawa-logo.svg" alt="PawX.ai" className="h-6 w-6 sm:h-7 sm:w-7" />
                 <span>PawX.ai</span>
               </Link>
               <div className="hidden sm:flex space-x-4 md:space-x-6">

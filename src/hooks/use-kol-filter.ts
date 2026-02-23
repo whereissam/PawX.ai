@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react"
 import type { KolUser } from "@/types"
-import { filterKols, mapFilterResultToKolUser, getTweetsInfo } from "@/lib/api"
+import { filterKols, mapFilterResultToKolUser, getUserInfo } from "@/lib/api"
 
 export function useKolFilter() {
   const [selectedCategories, setSelectedCategories] = useState<Record<string, string[]>>({})
@@ -39,51 +39,70 @@ export function useKolFilter() {
     setSearchApplied(true)
 
     try {
-      const results = await filterKols({
-        language_tags: languageTags,
-        ecosystem_tags: ecosystemTags,
-        user_type_tags: userTypeTags,
-      })
+      const hasCategoryFilters =
+        languageTags.length > 0 || ecosystemTags.length > 0 || userTypeTags.length > 0
+      const hasSearch = searchQuery.trim().length > 0
 
-      let kols = results.map(mapFilterResultToKolUser)
+      let kols: KolUser[]
 
-      // Fetch profile images from tweets_info API (response includes user data)
-      const screenNames = kols.map((k) => k.screenName)
-      if (screenNames.length > 0) {
+      if (!hasCategoryFilters && hasSearch) {
+        // Search-only: look up the user directly by screen name
         try {
-          const tweetsData = await getTweetsInfo(screenNames)
-          const profileMap = new Map<string, typeof tweetsData[number]["user"]>()
-          for (const item of tweetsData) {
-            if (item.user?.screenName) {
-              profileMap.set(item.user.screenName.toLowerCase(), item.user)
-            }
-          }
-          kols = kols.map((kol) => {
-            const profile = profileMap.get(kol.screenName.toLowerCase())
-            if (profile?.profileImageUrlHttps) {
-              return {
-                ...kol,
-                name: profile.name || kol.name,
-                profileImageUrlHttps: profile.profileImageUrlHttps,
-              }
-            }
-            return kol
-          })
+          const profiles = await getUserInfo([searchQuery.trim()])
+          kols = profiles.map((p) => ({
+            ...p,
+            tags: p.tags ?? [],
+            isKol: p.isKol ?? false,
+            kolFollowersCount: p.kolFollowersCount ?? 0,
+          }))
         } catch {
-          // Profile images are non-critical, continue without them
+          kols = []
         }
-      }
+      } else {
+        // Category filter (optionally combined with search)
+        const results = await filterKols({
+          language_tags: languageTags,
+          ecosystem_tags: ecosystemTags,
+          user_type_tags: userTypeTags,
+        })
 
-      // Client-side text search on top of API results
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase()
-        kols = kols.filter(
-          (kol) =>
-            kol.name.toLowerCase().includes(q) ||
-            kol.screenName.toLowerCase().includes(q) ||
-            kol.description.toLowerCase().includes(q) ||
-            kol.tags.some((t) => t.toLowerCase().includes(q))
-        )
+        kols = results.map(mapFilterResultToKolUser)
+
+        // Fetch profile images from user_info API
+        const screenNames = kols.map((k) => k.screenName)
+        if (screenNames.length > 0) {
+          try {
+            const profiles = await getUserInfo(screenNames)
+            const profileMap = new Map(
+              profiles.map((p) => [p.screenName.toLowerCase(), p])
+            )
+            kols = kols.map((kol) => {
+              const profile = profileMap.get(kol.screenName.toLowerCase())
+              if (profile?.profileImageUrlHttps) {
+                return {
+                  ...kol,
+                  name: profile.name || kol.name,
+                  profileImageUrlHttps: profile.profileImageUrlHttps,
+                }
+              }
+              return kol
+            })
+          } catch {
+            // Profile images are non-critical, continue without them
+          }
+        }
+
+        // Client-side text search on top of API results
+        if (hasSearch) {
+          const q = searchQuery.toLowerCase()
+          kols = kols.filter(
+            (kol) =>
+              kol.name.toLowerCase().includes(q) ||
+              kol.screenName.toLowerCase().includes(q) ||
+              kol.description.toLowerCase().includes(q) ||
+              kol.tags.some((t) => t.toLowerCase().includes(q))
+          )
+        }
       }
 
       setFilteredKols(kols)

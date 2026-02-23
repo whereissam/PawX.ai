@@ -46,7 +46,7 @@ export function InteractionFeed({
     <div className="space-y-3">
       {/* Live WebSocket messages */}
       {wsMessages.map((msg) => (
-        <LiveTweetCard key={msg.id} message={msg} />
+        <LiveTweetCard key={msg.id} message={msg} selectedKols={selectedKols} />
       ))}
 
       {/* Past interactions (mock data) */}

@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { PawXLogo } from "@/components/logo"
 import { KolFilterBar } from "@/components/kol/kol-filter-bar"
 import { KolGrid } from "@/components/kol/kol-grid"
 import { KolDetailDrawer } from "@/components/kol/kol-detail-drawer"
@@ -45,7 +44,7 @@ function KolDirectoryPage() {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Header */}
         <div className="flex items-center gap-2.5 sm:gap-3 mb-2">
-          <PawXLogo className="h-8 w-8 sm:h-10 sm:w-10" />
+          <img src="/pawa-logo.svg" alt="PawX.ai" className="h-8 w-8 sm:h-10 sm:w-10" />
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">KOL Directory</h1>
             <p className="text-xs sm:text-sm text-muted-foreground">

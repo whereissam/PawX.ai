@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { KOL_CATEGORIES, CATEGORY_LABELS } from "@/data/tags"
-import { Search, X, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, X, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface KolFilterBarProps {
@@ -14,6 +14,7 @@ interface KolFilterBarProps {
   onClear: () => void
   onSearch: () => void
   hasActiveFilters: boolean
+  isSearching?: boolean
 }
 
 export function KolFilterBar({
@@ -24,11 +25,12 @@ export function KolFilterBar({
   onClear,
   onSearch,
   hasActiveFilters,
+  isSearching = false,
 }: KolFilterBarProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    Language: true,
-    Ecosystem: true,
-    user_type: true,
+    language_tags: true,
+    ecosystem_tags: true,
+    user_type_tags: true,
   })
 
   const totalActive = Object.values(selectedCategories).reduce(
@@ -57,7 +59,12 @@ export function KolFilterBar({
             className="pl-9"
           />
         </div>
-        <Button size="sm" onClick={onSearch} className="shrink-0">
+        <Button size="sm" onClick={onSearch} disabled={isSearching} className="shrink-0 gap-1.5">
+          {isSearching ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Search className="h-3.5 w-3.5" />
+          )}
           Search
         </Button>
         {hasActiveFilters && (
@@ -73,7 +80,7 @@ export function KolFilterBar({
         )}
       </div>
 
-      {Object.entries(KOL_CATEGORIES).map(([category, values]) => {
+      {Object.entries(KOL_CATEGORIES).map(([category, options]) => {
         const isExpanded = expandedSections[category]
         const selectedCount = (selectedCategories[category] ?? []).length
 
@@ -98,19 +105,19 @@ export function KolFilterBar({
 
             {isExpanded && (
               <div className="flex gap-1.5 flex-wrap pl-4">
-                {values.map((value) => {
-                  const isSelected = (selectedCategories[category] ?? []).includes(value)
+                {options.map((opt) => {
+                  const isSelected = (selectedCategories[category] ?? []).includes(opt.value)
                   return (
                     <Badge
-                      key={value}
+                      key={opt.value}
                       variant={isSelected ? "default" : "outline"}
                       className={cn(
                         "cursor-pointer text-xs transition-colors",
                         isSelected && "bg-primary text-primary-foreground"
                       )}
-                      onClick={() => onToggleCategory(category, value)}
+                      onClick={() => onToggleCategory(category, opt.value)}
                     >
-                      {value}
+                      {opt.label}
                     </Badge>
                   )
                 })}

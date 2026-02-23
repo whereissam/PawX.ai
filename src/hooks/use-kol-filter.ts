@@ -1,32 +1,14 @@
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useState, useMemo, useCallback } from "react"
 import type { KolUser } from "@/types"
-import { kols as mockKols } from "@/data/kols"
-import { fetchKols } from "@/lib/api"
+import { filterKols, mapFilterResultToKolUser } from "@/lib/api"
 
 export function useKolFilter() {
   const [selectedCategories, setSelectedCategories] = useState<Record<string, string[]>>({})
   const [searchQuery, setSearchQuery] = useState("")
   const [searchApplied, setSearchApplied] = useState(false)
-  const [kols, setKols] = useState<KolUser[]>(mockKols)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      setIsLoading(true)
-      const data = await fetchKols()
-      if (!cancelled) {
-        setKols(data)
-        setIsLoading(false)
-      }
-    }
-
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  const [filteredKols, setFilteredKols] = useState<KolUser[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const toggleCategory = useCallback((category: string, value: string) => {
     setSelectedCategories((prev) => {
@@ -42,14 +24,56 @@ export function useKolFilter() {
     setSearchQuery(query)
   }, [])
 
-  const applySearch = useCallback(() => {
+  const applySearch = useCallback(async () => {
+    const languageTags = selectedCategories.language_tags ?? []
+    const ecosystemTags = selectedCategories.ecosystem_tags ?? []
+    const userTypeTags = selectedCategories.user_type_tags ?? []
+
+    // Need at least one filter selected
+    if (languageTags.length === 0 && ecosystemTags.length === 0 && userTypeTags.length === 0 && !searchQuery.trim()) {
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
     setSearchApplied(true)
-  }, [])
+
+    try {
+      const results = await filterKols({
+        language_tags: languageTags,
+        ecosystem_tags: ecosystemTags,
+        user_type_tags: userTypeTags,
+      })
+
+      let kols = results.map(mapFilterResultToKolUser)
+
+      // Client-side text search on top of API results
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase()
+        kols = kols.filter(
+          (kol) =>
+            kol.name.toLowerCase().includes(q) ||
+            kol.screenName.toLowerCase().includes(q) ||
+            kol.description.toLowerCase().includes(q) ||
+            kol.tags.some((t) => t.toLowerCase().includes(q))
+        )
+      }
+
+      setFilteredKols(kols)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to filter KOLs")
+      setFilteredKols([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedCategories, searchQuery])
 
   const clearFilters = useCallback(() => {
     setSelectedCategories({})
     setSearchQuery("")
     setSearchApplied(false)
+    setFilteredKols([])
+    setError(null)
   }, [])
 
   const hasActiveFilters = useMemo(() => {
@@ -59,39 +83,13 @@ export function useKolFilter() {
     return hasCategoryFilters || searchQuery.length > 0
   }, [selectedCategories, searchQuery])
 
-  const filteredKols = useMemo(() => {
-    return kols.filter((kol) => {
-      // Category filtering: check if KOL tags match any selected category values
-      for (const [, values] of Object.entries(selectedCategories)) {
-        if (values.length > 0) {
-          const hasMatch = values.some((v) =>
-            kol.tags.some((t) => t.toLowerCase().includes(v.toLowerCase()))
-          )
-          if (!hasMatch) return false
-        }
-      }
-
-      // Text search
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase()
-        return (
-          kol.name.toLowerCase().includes(q) ||
-          kol.screenName.toLowerCase().includes(q) ||
-          kol.description.toLowerCase().includes(q) ||
-          kol.tags.some((t) => t.toLowerCase().includes(q))
-        )
-      }
-
-      return true
-    })
-  }, [selectedCategories, searchQuery, kols])
-
   return {
     selectedCategories,
     searchQuery,
     searchApplied,
     filteredKols,
     isLoading,
+    error,
     hasActiveFilters,
     toggleCategory,
     setSearchQuery: setSearchQueryValue,

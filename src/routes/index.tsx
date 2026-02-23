@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useKolFilter } from "@/hooks/use-kol-filter"
 import { useKolSelection } from "@/hooks/use-kol-selection"
-import { ArrowRight, Search } from "lucide-react"
+import { ArrowRight, Search, Loader2 } from "lucide-react"
 import type { KolUser } from "@/types"
 
 function KolDirectoryPage() {
@@ -17,6 +17,8 @@ function KolDirectoryPage() {
     searchQuery,
     searchApplied,
     filteredKols,
+    isLoading,
+    error,
     hasActiveFilters,
     toggleCategory,
     setSearchQuery,
@@ -37,8 +39,6 @@ function KolDirectoryPage() {
     setDetailKol(kol)
     setDrawerOpen(true)
   }
-
-  const showGrid = searchApplied || hasActiveFilters
 
   return (
     <div className="min-h-screen">
@@ -88,11 +88,27 @@ function KolDirectoryPage() {
             onClear={clearFilters}
             onSearch={applySearch}
             hasActiveFilters={hasActiveFilters}
+            isSearching={isLoading}
           />
         </div>
 
+        {/* Error */}
+        {error && (
+          <div className="p-3 mb-4 bg-red-500/10 rounded-lg">
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* Loading */}
+        {isLoading && (
+          <div className="text-center py-16">
+            <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Filtering KOLs...</p>
+          </div>
+        )}
+
         {/* KOL Grid - only shown after search */}
-        {showGrid ? (
+        {!isLoading && searchApplied ? (
           <>
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <p className="text-sm text-muted-foreground">
@@ -106,7 +122,7 @@ function KolDirectoryPage() {
               onViewDetail={handleViewDetail}
             />
           </>
-        ) : (
+        ) : !isLoading ? (
           <div className="text-center py-16 sm:py-24 text-muted-foreground">
             <Search className="h-12 w-12 mx-auto mb-4 opacity-30" />
             <p className="text-sm font-medium">Select categories and press Search</p>
@@ -114,7 +130,7 @@ function KolDirectoryPage() {
               Choose filters above and hit Enter or the Search button to find KOLs
             </p>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Detail Drawer */}

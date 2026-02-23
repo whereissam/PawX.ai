@@ -2,6 +2,8 @@ import axios from "axios"
 import type {
   TweetResponse,
   KolUser,
+  KolFilterParams,
+  KolFilterResult,
   LinkedInSearchParams,
   LinkedInSearchResponse,
   LinkedInProfile,
@@ -42,6 +44,36 @@ export async function wsSubscribe(twitterUsername: string) {
 export async function wsUnsubscribe(twitterUsername: string) {
   const { data } = await api.post("/ws/unsubscribe", { twitterUsername })
   return data
+}
+
+// ── KOL Filter API ──────────────────────────────────────────────
+
+export async function filterKols(
+  params: KolFilterParams
+): Promise<KolFilterResult[]> {
+  const { data } = await api.post("/kol_filter", params)
+  return data
+}
+
+/** Convert KolFilterResult to KolUser for component compatibility */
+export function mapFilterResultToKolUser(result: KolFilterResult): KolUser {
+  return {
+    id: result.username,
+    name: result.username,
+    screenName: result.username,
+    location: result.location || undefined,
+    description: result.description || "",
+    website: result.website || undefined,
+    followersCount: result.followersCount,
+    friendsCount: result.friendsCount,
+    kolFollowersCount: result.kolFollowersCount,
+    isKol: true,
+    tags: [
+      ...result.language_tags,
+      ...result.ecosystem_tags,
+      ...result.user_type_tags,
+    ],
+  }
 }
 
 // ── LinkedIn API calls ──────────────────────────────────────────

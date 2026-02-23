@@ -129,6 +129,28 @@ export interface OutreachCampaign {
   createdAt: string
 }
 
+// --- KOL Filter ---
+export interface KolFilterParams {
+  language_tags: string[]
+  ecosystem_tags: string[]
+  user_type_tags: string[]
+}
+
+export interface KolFilterResult {
+  language_tags: string[]
+  ecosystem_tags: string[]
+  user_type_tags: string[]
+  MBTI: string
+  summary: string
+  location: string
+  description: string
+  website: string
+  followersCount: number
+  friendsCount: number
+  kolFollowersCount: number
+  username: string
+}
+
 // --- LinkedIn Search ---
 export interface LinkedInSearchParams {
   title: string

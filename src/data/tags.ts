@@ -13,15 +13,50 @@ export const KOL_TAGS: { value: string; label: string }[] = Array.from(tagSet).m
   label: tag,
 }))
 
-// 3-category grouped filters
-export const KOL_CATEGORIES: Record<string, string[]> = {
-  Language: ["English", "Chinese", "Japanese", "Korean", "Spanish", "French"],
-  Ecosystem: ["Ethereum", "Solana", "Bitcoin", "BNB Chain", "Polygon", "Arbitrum", "Base"],
-  user_type: ["Influencer", "Developer", "Trader", "Analyst", "Founder", "VC"],
+// 3-category grouped filters — values must match API exactly
+export const KOL_CATEGORIES: Record<string, { value: string; label: string }[]> = {
+  language_tags: [
+    { value: "english", label: "English" },
+    { value: "chinese", label: "Chinese" },
+    { value: "japanese", label: "Japanese" },
+    { value: "korean", label: "Korean" },
+    { value: "spanish", label: "Spanish" },
+    { value: "french", label: "French" },
+  ],
+  ecosystem_tags: [
+    { value: "ethereum", label: "Ethereum" },
+    { value: "solana", label: "Solana" },
+    { value: "bitcoin", label: "Bitcoin" },
+    { value: "bnb_chain", label: "BNB Chain" },
+    { value: "base", label: "Base" },
+    { value: "arbitrum", label: "Arbitrum" },
+    { value: "polygon_pos", label: "Polygon" },
+    { value: "avalanche", label: "Avalanche" },
+    { value: "sui", label: "Sui" },
+    { value: "near", label: "NEAR" },
+    { value: "linea", label: "Linea" },
+    { value: "hyperliquid", label: "Hyperliquid" },
+    { value: "rollups", label: "Rollups" },
+    { value: "zk_rollups", label: "ZK Rollups" },
+  ],
+  user_type_tags: [
+    { value: "community", label: "Community" },
+    { value: "trader", label: "Trader" },
+    { value: "alpha_hunter", label: "Alpha Hunter" },
+    { value: "onchain_analyst", label: "On-chain Analyst" },
+    { value: "developer", label: "Developer" },
+    { value: "founder & CEO", label: "Founder & CEO" },
+    { value: "researcher", label: "Researcher" },
+    { value: "defi_user", label: "DeFi User" },
+    { value: "meme_creator", label: "Meme Creator" },
+    { value: "nft_collector", label: "NFT Collector" },
+    { value: "gamefi_player", label: "GameFi Player" },
+    { value: "technical_sharer", label: "Technical Sharer" },
+  ],
 }
 
 export const CATEGORY_LABELS: Record<string, string> = {
-  Language: "Language",
-  Ecosystem: "Ecosystem",
-  user_type: "User Type",
+  language_tags: "Language",
+  ecosystem_tags: "Ecosystem",
+  user_type_tags: "User Type",
 }

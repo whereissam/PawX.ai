@@ -14,9 +14,12 @@ import {
   Play,
   ArrowLeft,
   Zap,
+  CheckCircle2,
+  LinkIcon,
 } from "lucide-react"
 import { useKolSelection } from "@/hooks/use-kol-selection"
 import { useInteractionConfig } from "@/hooks/use-interaction-config"
+import { useAuth } from "@/hooks/use-auth"
 import { getTweetsInfo } from "@/lib/api"
 import { analyzeTwitterStyle, generateSampleReplies } from "@/lib/gemini"
 
@@ -47,6 +50,7 @@ function ConfigurePage() {
   const navigate = useNavigate()
   const { selectedKols } = useKolSelection()
   const { config, updateConfig } = useInteractionConfig()
+  const { user, isTwitterConnected, signInWithTwitter } = useAuth()
 
   const [twitterHandle, setTwitterHandle] = useState(config.twitterHandle ?? "")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -133,6 +137,43 @@ function ConfigurePage() {
         </div>
 
         <div className="space-y-6">
+          {/* Section 0: Twitter Account */}
+          <Card>
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-foreground/5">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </div>
+                  <div>
+                    <h2 className="font-semibold text-base">Twitter Account</h2>
+                    {isTwitterConnected ? (
+                      <div className="flex items-center gap-1.5 text-xs text-emerald-600">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Connected{user?.name ? ` as ${user.name}` : ""}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        Connect to post tweets on your behalf
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {!isTwitterConnected && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={signInWithTwitter}
+                    className="gap-1.5"
+                  >
+                    <LinkIcon className="h-3.5 w-3.5" />
+                    Connect
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Section 1: Reply Style */}
           <Card>
             <CardContent className="p-4 sm:p-6 space-y-4">

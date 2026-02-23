@@ -21,8 +21,6 @@ import {
   ChevronDown,
   Users,
 } from "lucide-react"
-import { mockInteractions } from "@/data/tweets"
-import { wsSubscribe, wsUnsubscribe } from "@/lib/api"
 import { useWebSocket } from "@/hooks/use-websocket"
 import { useKolSelection } from "@/hooks/use-kol-selection"
 import { useInteractionConfig } from "@/hooks/use-interaction-config"
@@ -32,44 +30,35 @@ function InteractPage() {
   const { config, isConfigured } = useInteractionConfig()
 
   const [isRunning, setIsRunning] = useState(false)
-  const [subscribeError, setSubscribeError] = useState<string | null>(null)
+
+  // On WS open, subscribe only KOLs not already subscribed server-side
+  const subscribeNewKols = useCallback((send: (data: unknown) => void) => {
+    for (const kol of selectedKols) {
+      send({ type: "subscribe", twitterUsername: kol.screenName })
+    }
+  }, [selectedKols])
 
   const {
     status: wsStatus,
     messages: wsMessages,
+    subscribedUsers,
+    subscriptionCount,
+    subscriptionLimit,
     connect,
     disconnect,
+    sendMessage,
     clearMessages,
-  } = useWebSocket()
+  } = useWebSocket({ onOpen: subscribeNewKols })
 
-  const handleStart = useCallback(async () => {
-    if (selectedKols.length === 0) return
-    setSubscribeError(null)
+  const handleStart = useCallback(() => {
+    connect()
+    setIsRunning(true)
+  }, [connect])
 
-    try {
-      await Promise.all(
-        selectedKols.map((kol) => wsSubscribe(kol.screenName))
-      )
-      connect()
-      setIsRunning(true)
-    } catch (err) {
-      setSubscribeError(
-        err instanceof Error ? err.message : "Failed to subscribe"
-      )
-    }
-  }, [selectedKols, connect])
-
-  const handleStop = useCallback(async () => {
-    try {
-      await Promise.all(
-        selectedKols.map((kol) => wsUnsubscribe(kol.screenName))
-      )
-    } catch {
-      // Best-effort unsubscribe
-    }
+  const handleStop = useCallback(() => {
     disconnect()
     setIsRunning(false)
-  }, [selectedKols, disconnect])
+  }, [disconnect])
 
   const statusConfig = {
     disconnected: { icon: WifiOff, label: "Offline", color: "text-muted-foreground" },
@@ -81,6 +70,10 @@ function InteractPage() {
   const currentStatus = statusConfig[wsStatus]
   const StatusIcon = currentStatus.icon
 
+  // Show WS subscribed users when connected, otherwise show locally selected KOLs
+  const displayUsers = subscribedUsers.length > 0 ? subscribedUsers : selectedKols
+  const displayCount = subscribedUsers.length > 0 ? subscriptionCount : selectedKols.length
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-4xl">
@@ -89,7 +82,7 @@ function InteractPage() {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">Monitor</h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Watching {selectedKols.length} account{selectedKols.length !== 1 ? "s" : ""} for new tweets
+              Watching {displayCount} account{displayCount !== 1 ? "s" : ""} for new tweets
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -116,7 +109,6 @@ function InteractPage() {
                 <Button
                   variant={isRunning ? "destructive" : "default"}
                   onClick={isRunning ? handleStop : handleStart}
-                  disabled={selectedKols.length === 0}
                   className="gap-2"
                 >
                   {isRunning ? (
@@ -154,54 +146,64 @@ function InteractPage() {
                     Conditional replies
                   </Badge>
                 )}
-                {selectedKols.length > 0 && (
+                {displayCount > 0 && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 py-1 text-xs font-medium hover:bg-primary/90 transition-colors">
                         <Users className="h-3 w-3" />
-                        {selectedKols.length} KOL{selectedKols.length !== 1 ? "s" : ""}
+                        {displayCount}{subscriptionLimit > 0 ? `/${subscriptionLimit}` : ""} subscribed
                         <ChevronDown className="h-3 w-3" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-64 p-2 max-h-72 overflow-y-auto">
+                    <DropdownMenuContent align="end" className="w-72 p-2 max-h-80 overflow-y-auto">
                       <p className="text-xs font-medium text-muted-foreground px-2 pb-2">
-                        Monitoring {selectedKols.length} account{selectedKols.length !== 1 ? "s" : ""}
+                        {displayCount} subscribed account{displayCount !== 1 ? "s" : ""}
+                        {subscriptionLimit > 0 && ` (limit ${subscriptionLimit})`}
                       </p>
-                      {selectedKols.map((kol) => {
-                        const src = kol.profileImageUrlHttps
-                          ? kol.profileImageUrlHttps.replace("_normal", "_bigger")
-                          : `https://api.dicebear.com/9.x/avataaars/svg?seed=${kol.screenName}`
-                        return (
+                      {displayUsers.map((user) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md hover:bg-muted transition-colors"
+                        >
                           <a
-                            key={kol.id}
-                            href={`https://x.com/${kol.screenName}`}
+                            href={`https://x.com/${user.screenName}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-muted transition-colors"
+                            className="flex items-center gap-2.5 min-w-0 flex-1"
                           >
                             <Avatar className="h-7 w-7 shrink-0">
-                              <AvatarImage src={src} alt={kol.name} />
-                              <AvatarFallback className="text-[10px]">{kol.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                              <AvatarImage
+                                src={`https://api.dicebear.com/9.x/initials/svg?seed=${user.name}`}
+                                alt={user.name}
+                              />
+                              <AvatarFallback className="text-[10px]">
+                                {user.name.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">{kol.name}</p>
-                              <p className="text-xs text-muted-foreground truncate">@{kol.screenName}</p>
+                              <p className="text-sm font-medium truncate">{user.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">@{user.screenName}</p>
                             </div>
                           </a>
-                        )
-                      })}
+                          {isRunning && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                sendMessage({ type: "unsubscribe", twitterUsername: user.screenName })
+                              }}
+                              className="text-[10px] text-muted-foreground hover:text-destructive shrink-0 px-1"
+                              title="Unsubscribe"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
               </div>
             </div>
-
-            {subscribeError && (
-              <div className="flex items-center gap-2 p-2 mt-3 bg-red-500/10 rounded-lg">
-                <AlertCircle className="h-3.5 w-3.5 text-red-600 shrink-0" />
-                <p className="text-xs text-red-700">{subscribeError}</p>
-              </div>
-            )}
 
             {!isRunning && selectedKols.length === 0 && (
               <div className="mt-3 text-center">
@@ -219,7 +221,14 @@ function InteractPage() {
 
         {/* Feed header */}
         <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 className="font-semibold text-sm sm:text-base">Interaction Feed</h2>
+          <h2 className="font-semibold text-sm sm:text-base">
+            Interaction Feed
+            {wsMessages.length > 0 && (
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                ({wsMessages.length} message{wsMessages.length !== 1 ? "s" : ""})
+              </span>
+            )}
+          </h2>
           <div className="flex items-center gap-2">
             {wsMessages.length > 0 && (
               <Button
@@ -245,13 +254,7 @@ function InteractPage() {
           selectedKols={selectedKols}
           isRunning={isRunning}
           wsMessages={wsMessages}
-          pastInteractions={
-            isRunning
-              ? mockInteractions.filter((i) =>
-                  selectedKols.some((k) => k.id === i.kolId)
-                )
-              : []
-          }
+          pastInteractions={[]}
         />
       </div>
     </div>

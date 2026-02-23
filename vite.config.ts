@@ -20,6 +20,14 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      '/api/auth': {
+        target: 'http://localhost:3005',
+        changeOrigin: true,
+      },
+      '/api/twitter': {
+        target: 'http://localhost:3005',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'https://pawx-social-assistant.onrender.com',
         changeOrigin: true,

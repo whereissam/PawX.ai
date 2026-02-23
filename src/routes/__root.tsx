@@ -1,6 +1,62 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { MobileNav } from '@/components/mobile-nav'
+import { useAuth } from '@/hooks/use-auth'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { LogOut } from 'lucide-react'
+
+function NavbarAuth() {
+  const { user, isLoading, signInWithTwitter, signOut } = useAuth()
+
+  if (isLoading) {
+    return <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+  }
+
+  if (!user) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={signInWithTwitter}
+        className="gap-1.5"
+      >
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <span className="hidden sm:inline">Connect X</span>
+      </Button>
+    )
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user.image || undefined} alt={user.name} />
+            <AvatarFallback className="text-xs">
+              {user.name?.charAt(0)?.toUpperCase() || '?'}
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <div className="px-2 py-1.5 text-sm font-medium truncate">
+          {user.name}
+        </div>
+        <DropdownMenuItem onClick={signOut} className="gap-2 text-destructive">
+          <LogOut className="h-3.5 w-3.5" />
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
 
 export const Route = createRootRoute({
   component: () => (
@@ -43,7 +99,8 @@ export const Route = createRootRoute({
                 </Link>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              <NavbarAuth />
               <MobileNav />
             </div>
           </div>

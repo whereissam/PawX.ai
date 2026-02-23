@@ -5,6 +5,7 @@ import { routeTree } from "./routeTree.gen";
 import { ThemeProvider } from "@/components/theme-provider";
 import { KolSelectionProvider } from "@/hooks/use-kol-selection";
 import { InteractionConfigProvider } from "@/hooks/use-interaction-config";
+import { AuthProvider } from "@/hooks/use-auth";
 import "./index.css";
 
 const router = createRouter({ routeTree });
@@ -15,11 +16,13 @@ if (!rootElement.innerHTML) {
   root.render(
     <React.StrictMode>
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        <KolSelectionProvider>
-          <InteractionConfigProvider>
-            <RouterProvider router={router} />
-          </InteractionConfigProvider>
-        </KolSelectionProvider>
+        <AuthProvider>
+          <KolSelectionProvider>
+            <InteractionConfigProvider>
+              <RouterProvider router={router} />
+            </InteractionConfigProvider>
+          </KolSelectionProvider>
+        </AuthProvider>
       </ThemeProvider>
     </React.StrictMode>
   );

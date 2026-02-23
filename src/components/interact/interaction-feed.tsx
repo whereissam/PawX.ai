@@ -18,18 +18,6 @@ export function InteractionFeed({
   wsMessages,
   pastInteractions,
 }: InteractionFeedProps) {
-  if (selectedKols.length === 0) {
-    return (
-      <div className="text-center py-10 sm:py-16 text-muted-foreground">
-        <MessageSquare className="h-10 w-10 mx-auto mb-3 opacity-40" />
-        <p className="text-sm font-medium">No accounts selected</p>
-        <p className="text-xs mt-1">
-          Select accounts from the sidebar to start monitoring
-        </p>
-      </div>
-    )
-  }
-
   if (!isRunning && wsMessages.length === 0 && pastInteractions.length === 0) {
     return (
       <div className="text-center py-10 sm:py-16 text-muted-foreground">

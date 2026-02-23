@@ -6,7 +6,8 @@
       "Bash(bunx @tanstack/router-cli generate:*)",
       "Bash(bun add:*)",
       "Bash(timeout 8 bun run:*)",
-      "WebFetch(domain:pawx-social-assistant.onrender.com)"
+      "WebFetch(domain:pawx-social-assistant.onrender.com)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

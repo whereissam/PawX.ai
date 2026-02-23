@@ -34,61 +34,73 @@ function parseTweetData(message: WsMessage, selectedKols: KolUser[]) {
   const raw = message.data as Record<string, any>
   const inner = raw?.data as Record<string, any> | undefined
 
-  // "user-full-tweet" format: { type, data: { userId, status: {...}, relatedFullTweets, timestamp } }
-  if (inner?.status) {
-    const status = inner.status as Record<string, any>
-    const userId = inner.userId as string | undefined
-
-    // Look up user from selectedKols
-    const kol = selectedKols.find((k) => k.id === userId)
-
-    // Try to get user info from relatedFullTweets if the tweet has in_reply_to
-    const relatedTweets = inner.relatedFullTweets as Record<string, any>[] | undefined
-
-    const text = (status.full_text ?? status.text ?? "") as string
-    const createdAt = status.created_at as string | undefined
-    const replyCount = (status.reply_count ?? 0) as number
-    const retweetCount = (status.retweet_count ?? 0) as number
-    const favoriteCount = (status.favorite_count ?? 0) as number
-    const bookmarkCount = (status.bookmark_count ?? 0) as number
-    const quoteCount = (status.quote_count ?? 0) as number
-    const viewCount = (status.views?.count ?? 0) as number
-
+  if (!inner?.status) {
+    // Fallback: generic format
+    const text = (raw?.text ?? raw?.full_text ?? raw?.message ?? JSON.stringify(raw)) as string
+    const userObj = raw?.user as Record<string, any> | undefined
     return {
       text,
-      name: kol?.name ?? "Unknown",
-      screenName: kol?.screenName ?? "unknown",
-      avatarUrl: kol?.profileImageUrlHttps
-        ? kol.profileImageUrlHttps.replace("_normal", "_bigger")
-        : undefined,
-      createdAt: createdAt ? formatDate(createdAt) : formatDate(inner.timestamp ?? message.receivedAt),
-      replyCount,
-      retweetCount,
-      favoriteCount,
-      bookmarkCount,
-      quoteCount,
-      viewCount,
-      relatedTweets,
+      name: (userObj?.name ?? raw?.name ?? "Unknown") as string,
+      screenName: (userObj?.screen_name ?? userObj?.screenName ?? "unknown") as string,
+      avatarUrl: (userObj?.profile_image_url_https ?? userObj?.profileImageUrlHttps) as string | undefined,
+      createdAt: formatDate(message.receivedAt),
+      replyCount: 0, retweetCount: 0, favoriteCount: 0,
+      bookmarkCount: 0, quoteCount: 0, viewCount: 0,
+      relatedTweets: undefined as Record<string, any>[] | undefined,
     }
   }
 
-  // Fallback: generic format
-  const text = (raw?.text ?? raw?.full_text ?? raw?.message ?? JSON.stringify(raw)) as string
-  const userObj = raw?.user as Record<string, any> | undefined
+  const status = inner.status as Record<string, any>
+  const statusUser = status.user as Record<string, any> | undefined
+  const relatedTweets = inner.relatedFullTweets as Record<string, any>[] | undefined
+
+  // "user-update" has data.twitterUser with full profile info
+  const twitterUser = inner.twitterUser as Record<string, any> | undefined
+
+  // "user-full-tweet" has data.userId + status.user
+  const userId = (inner.userId ?? twitterUser?.id) as string | undefined
+
+  // Resolve user info from best available source
+  const kol = selectedKols.find((k) => k.id === userId)
+    ?? selectedKols.find((k) => twitterUser?.screenName && k.screenName === twitterUser.screenName)
+    ?? selectedKols.find((k) => statusUser?.screen_name && k.screenName === statusUser.screen_name)
+  const relatedUser = relatedTweets?.find((t) => t.userId === userId)?.user as Record<string, any> | undefined
+
+  // Priority: twitterUser (user-update) > kol (selectedKols) > status.user > relatedUser
+  const userName = twitterUser?.name
+    ?? kol?.name
+    ?? statusUser?.name
+    ?? relatedUser?.name
+    ?? "Unknown"
+  const userScreenName = twitterUser?.screenName
+    ?? kol?.screenName
+    ?? statusUser?.screen_name ?? statusUser?.screenName
+    ?? relatedUser?.screenName
+    ?? "unknown"
+  const userAvatar = twitterUser?.profileImageUrlHttps
+    ?? kol?.profileImageUrlHttps
+    ?? statusUser?.profile_image_url_https ?? statusUser?.profileImageUrlHttps
+    ?? relatedUser?.profileImageUrlHttps
+    ?? undefined
+
+  const text = (status.full_text ?? status.text ?? "") as string
+  const createdAt = status.created_at as string | undefined
 
   return {
     text,
-    name: (userObj?.name ?? raw?.name ?? "Unknown") as string,
-    screenName: (userObj?.screen_name ?? userObj?.screenName ?? raw?.username ?? raw?.screen_name ?? "unknown") as string,
-    avatarUrl: (userObj?.profile_image_url_https ?? userObj?.profileImageUrlHttps) as string | undefined,
-    createdAt: formatDate(message.receivedAt),
-    replyCount: 0,
-    retweetCount: 0,
-    favoriteCount: 0,
-    bookmarkCount: 0,
-    quoteCount: 0,
-    viewCount: 0,
-    relatedTweets: undefined as Record<string, any>[] | undefined,
+    name: userName as string,
+    screenName: userScreenName as string,
+    avatarUrl: userAvatar
+      ? (userAvatar as string).replace("_normal", "_bigger")
+      : undefined,
+    createdAt: createdAt ? formatDate(createdAt) : formatDate(inner.timestamp ?? message.receivedAt),
+    replyCount: (status.reply_count ?? 0) as number,
+    retweetCount: (status.retweet_count ?? 0) as number,
+    favoriteCount: (status.favorite_count ?? 0) as number,
+    bookmarkCount: (status.bookmark_count ?? 0) as number,
+    quoteCount: (status.quote_count ?? 0) as number,
+    viewCount: (status.views?.count ?? 0) as number,
+    relatedTweets,
   }
 }
 
@@ -101,7 +113,7 @@ export function LiveTweetCard({ message, selectedKols }: LiveTweetCardProps) {
   const tweet = parseTweetData(message, selectedKols)
 
   const avatarSrc = tweet.avatarUrl
-    ?? `https://api.dicebear.com/9.x/avataaars/svg?seed=${tweet.screenName}`
+    ?? `https://api.dicebear.com/9.x/initials/svg?seed=${tweet.name}`
 
   // Simulate reply status
   const hash = message.id.charCodeAt(0) % 3

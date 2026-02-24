@@ -1,21 +1,22 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { GoogleGenAI } from "@google/genai"
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined
 
-function getModel() {
+function getClient() {
   if (!apiKey) {
     throw new Error("VITE_GEMINI_API_KEY is not set in environment variables")
   }
-  const genAI = new GoogleGenerativeAI(apiKey)
-  return genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+  return new GoogleGenAI({ apiKey })
 }
+
+const MODEL = "gemini-3-flash-preview"
 
 /**
  * Analyze tweets to produce a style summary describing tone, vocabulary,
  * topics, and sample phrases.
  */
 export async function analyzeTwitterStyle(tweets: string[]): Promise<string> {
-  const model = getModel()
+  const ai = getClient()
 
   const prompt = `You are an expert social media analyst. Analyze the following tweets and produce a concise style guide that an AI can use to replicate this person's writing style when composing tweet replies.
 
@@ -31,8 +32,11 @@ Provide a style guide covering:
 
 Write the style guide as a single paragraph prompt that could instruct an AI to reply in this style. Start directly with "Reply in..." — no preamble.`
 
-  const result = await model.generateContent(prompt)
-  return result.response.text()
+  const response = await ai.models.generateContent({
+    model: MODEL,
+    contents: prompt,
+  })
+  return response.text ?? ""
 }
 
 /**
@@ -42,7 +46,7 @@ export async function generateSampleReplies(
   stylePrompt: string,
   sampleTweets?: string[]
 ): Promise<string[]> {
-  const model = getModel()
+  const ai = getClient()
 
   const contextBlock = sampleTweets?.length
     ? `\n\nHere are some example tweets for context:\n${sampleTweets.map((t, i) => `${i + 1}. ${t}`).join("\n")}`
@@ -56,8 +60,11 @@ Generate exactly 3 different sample tweet replies that demonstrate this style. T
 
 Return ONLY the 3 replies, one per line, numbered 1. 2. 3. — no other text.`
 
-  const result = await model.generateContent(prompt)
-  const text = result.response.text()
+  const response = await ai.models.generateContent({
+    model: MODEL,
+    contents: prompt,
+  })
+  const text = response.text ?? ""
 
   const replies = text
     .split("\n")

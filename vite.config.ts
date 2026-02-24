@@ -21,11 +21,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/auth': {
-        target: 'http://localhost:3005',
+        target: 'http://localhost:5950',
         changeOrigin: true,
       },
       '/api/twitter': {
-        target: 'http://localhost:3005',
+        target: 'http://localhost:5950',
         changeOrigin: true,
       },
       '/api': {

@@ -1,6 +1,6 @@
 import { ReplyPreview } from "./reply-preview"
 import { LiveTweetCard } from "./live-tweet-card"
-import { MessageSquare, Radio } from "lucide-react"
+import { Radio } from "lucide-react"
 import type { KolUser } from "@/types"
 import type { WsMessage } from "@/hooks/use-websocket"
 import type { Interaction } from "@/types"

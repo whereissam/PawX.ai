@@ -22,7 +22,7 @@ import {
   BarChart3,
 } from "lucide-react"
 import { getTweetsInfo } from "@/lib/api"
-import type { KolUser, Tweet, TweetResponse } from "@/types"
+import type { KolUser, TweetResponse } from "@/types"
 
 function formatNumber(n: number | null | undefined): string {
   if (n == null) return "0"
@@ -170,7 +170,7 @@ export function KolDetailDrawer({
                 <span className="ml-2 text-sm text-muted-foreground">Loading tweets...</span>
               </div>
             ) : tweetResponses.length > 0 ? (
-              tweetResponses.map(({ tweet, user }) => (
+              tweetResponses.map(({ tweet }) => (
                   <div key={tweet.id} className="p-3 sm:p-4 bg-surface-2 rounded-lg shadow-neu-inset space-y-2.5">
                     {/* Header: avatar + name + handle + date */}
                     <div className="flex items-center gap-2.5">

@@ -1,6 +1,13 @@
 import { betterAuth } from "better-auth";
 import { getPool } from "./db";
 
+if (!process.env.BETTER_AUTH_SECRET) {
+  throw new Error("BETTER_AUTH_SECRET is not set. Generate one with: openssl rand -base64 32");
+}
+if (!process.env.TWITTER_CLIENT_ID || !process.env.TWITTER_CLIENT_SECRET) {
+  console.warn("WARNING: TWITTER_CLIENT_ID or TWITTER_CLIENT_SECRET is not set. Twitter OAuth will not work.");
+}
+
 export const auth = betterAuth({
   database: getPool(),
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5950",
@@ -13,8 +20,8 @@ export const auth = betterAuth({
 
   socialProviders: {
     twitter: {
-      clientId: process.env.TWITTER_CLIENT_ID || "",
-      clientSecret: process.env.TWITTER_CLIENT_SECRET || "",
+      clientId: process.env.TWITTER_CLIENT_ID!,
+      clientSecret: process.env.TWITTER_CLIENT_SECRET!,
       redirectURI: `${process.env.APP_URL || "http://localhost:5175"}/api/auth/callback/twitter`,
       scope: ["tweet.read", "tweet.write", "users.read", "offline.access"],
     },
@@ -22,9 +29,6 @@ export const auth = betterAuth({
 
   advanced: {
     useSecureCookies: process.env.NODE_ENV === "production",
-    crossSubDomainCookies: {
-      enabled: true,
-    },
   },
 
   logger: {

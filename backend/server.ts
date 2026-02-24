@@ -60,10 +60,15 @@ app.use('/api/auth', async (req, res, next) => {
     headers.set('x-forwarded-host', host);
     headers.set('x-forwarded-proto', proto);
 
+    const hasBody = req.method !== 'GET' && req.method !== 'HEAD';
+    if (hasBody) {
+      headers.set('content-type', 'application/json');
+    }
+
     const webRequest = new Request(url, {
       method: req.method,
       headers,
-      body: req.method !== 'GET' && req.method !== 'HEAD' ? JSON.stringify(req.body) : undefined,
+      body: hasBody ? JSON.stringify(req.body) : undefined,
     });
 
     const response = await auth.handler(webRequest);
@@ -154,10 +159,17 @@ async function refreshTwitterToken(accountId: string, refreshToken: string): Pro
 
     const data = await resp.json() as any;
     const pool = getPool();
-    await pool.query(
-      `UPDATE "account" SET "accessToken" = $1, "refreshToken" = $2, "accessTokenExpiresAt" = $3 WHERE id = $4`,
-      [data.access_token, data.refresh_token, new Date(Date.now() + data.expires_in * 1000), accountId]
-    );
+    if (data.refresh_token) {
+      await pool.query(
+        `UPDATE "account" SET "accessToken" = $1, "refreshToken" = $2, "accessTokenExpiresAt" = $3 WHERE id = $4`,
+        [data.access_token, data.refresh_token, new Date(Date.now() + data.expires_in * 1000), accountId]
+      );
+    } else {
+      await pool.query(
+        `UPDATE "account" SET "accessToken" = $1, "accessTokenExpiresAt" = $2 WHERE id = $3`,
+        [data.access_token, new Date(Date.now() + data.expires_in * 1000), accountId]
+      );
+    }
 
     return data.access_token;
   } catch (error) {
@@ -209,9 +221,9 @@ app.post('/api/twitter/tweet', async (req, res) => {
     const account = result.rows[0];
     let accessToken = account.accessToken;
 
-    // Refresh if expired or expiring within 5 min
+    // Refresh if expired, expiring within 5 min, or no expiry recorded
     const expiresAt = account.accessTokenExpiresAt ? new Date(account.accessTokenExpiresAt) : null;
-    if (expiresAt && expiresAt.getTime() < Date.now() + 5 * 60 * 1000) {
+    if (!expiresAt || expiresAt.getTime() < Date.now() + 5 * 60 * 1000) {
       if (!account.refreshToken) {
         return res.status(400).json({ error: 'Token expired, no refresh token. Please reconnect Twitter.' });
       }

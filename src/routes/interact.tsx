@@ -9,6 +9,12 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip"
 import { InteractionFeed } from "@/components/interact/interaction-feed"
 import {
   Play,
@@ -106,23 +112,37 @@ function InteractPage() {
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
-                <Button
-                  variant={isRunning ? "destructive" : "default"}
-                  onClick={isRunning ? handleStop : handleStart}
-                  className="gap-2"
-                >
-                  {isRunning ? (
-                    <>
-                      <Square className="h-4 w-4" />
-                      Stop Monitoring
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-4 w-4" />
-                      Start Monitoring
-                    </>
-                  )}
-                </Button>
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex">
+                        <Button
+                          variant={isRunning ? "destructive" : "default"}
+                          onClick={isRunning ? handleStop : handleStart}
+                          disabled={!isRunning && !isConfigured}
+                          className="gap-2"
+                        >
+                          {isRunning ? (
+                            <>
+                              <Square className="h-4 w-4" />
+                              Stop Monitoring
+                            </>
+                          ) : (
+                            <>
+                              <Play className="h-4 w-4" />
+                              Start Monitoring
+                            </>
+                          )}
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    {!isRunning && !isConfigured && (
+                      <TooltipContent>
+                        Set up your AI reply style first
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
 
                 {isRunning && (
                   <div className="flex items-center gap-1.5">
@@ -205,7 +225,18 @@ function InteractPage() {
               </div>
             </div>
 
-            {!isRunning && selectedKols.length === 0 && (
+            {!isRunning && !isConfigured && (
+              <div className="mt-3 flex items-center justify-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <p className="text-xs text-yellow-700">
+                  Configure your AI reply style before monitoring.{" "}
+                  <Link to="/configure" className="text-primary hover:underline font-medium">
+                    Set up style
+                  </Link>
+                </p>
+              </div>
+            )}
+
+            {!isRunning && isConfigured && selectedKols.length === 0 && (
               <div className="mt-3 text-center">
                 <p className="text-xs text-muted-foreground">
                   No KOLs selected.{" "}

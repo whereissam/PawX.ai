@@ -40,6 +40,43 @@ Write the style guide as a single paragraph prompt that could instruct an AI to 
 }
 
 /**
+ * Generate a reply for a specific tweet using the configured style.
+ */
+export async function generateReply(
+  stylePrompt: string,
+  tweetText: string,
+  tweetAuthor: string,
+  conditionPrompt?: string
+): Promise<{ reply: string; shouldReply: boolean; reason?: string }> {
+  const ai = getClient()
+
+  const conditionBlock = conditionPrompt
+    ? `\n\nBefore replying, check if this tweet matches the following condition: "${conditionPrompt}"\nIf it does NOT match, respond with exactly: SKIP: <reason>\nIf it matches, respond with your reply.`
+    : ""
+
+  const prompt = `You are a Twitter reply bot. Your style instructions are:
+
+"${stylePrompt}"${conditionBlock}
+
+Reply to the following tweet by @${tweetAuthor}:
+"${tweetText}"
+
+Write a single reply tweet (1-2 sentences, under 280 characters). Be authentic and engaging. Return ONLY the reply text — no quotes, no preamble.`
+
+  const response = await ai.models.generateContent({
+    model: MODEL,
+    contents: prompt,
+  })
+  const text = (response.text ?? "").trim()
+
+  if (text.startsWith("SKIP:")) {
+    return { reply: "", shouldReply: false, reason: text.replace("SKIP:", "").trim() }
+  }
+
+  return { reply: text, shouldReply: true }
+}
+
+/**
  * Generate 3 sample tweet replies based on a style prompt.
  */
 export async function generateSampleReplies(

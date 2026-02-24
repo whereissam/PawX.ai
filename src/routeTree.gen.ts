@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReplyRouteImport } from './routes/reply'
 import { Route as OutreachRouteImport } from './routes/outreach'
 import { Route as InteractRouteImport } from './routes/interact'
 import { Route as ConfigureRouteImport } from './routes/configure'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ReplyRoute = ReplyRouteImport.update({
+  id: '/reply',
+  path: '/reply',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OutreachRoute = OutreachRouteImport.update({
   id: '/outreach',
   path: '/outreach',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/configure': typeof ConfigureRoute
   '/interact': typeof InteractRoute
   '/outreach': typeof OutreachRoute
+  '/reply': typeof ReplyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/configure': typeof ConfigureRoute
   '/interact': typeof InteractRoute
   '/outreach': typeof OutreachRoute
+  '/reply': typeof ReplyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/configure': typeof ConfigureRoute
   '/interact': typeof InteractRoute
   '/outreach': typeof OutreachRoute
+  '/reply': typeof ReplyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/configure' | '/interact' | '/outreach'
+  fullPaths: '/' | '/configure' | '/interact' | '/outreach' | '/reply'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/configure' | '/interact' | '/outreach'
-  id: '__root__' | '/' | '/configure' | '/interact' | '/outreach'
+  to: '/' | '/configure' | '/interact' | '/outreach' | '/reply'
+  id: '__root__' | '/' | '/configure' | '/interact' | '/outreach' | '/reply'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,10 +76,18 @@ export interface RootRouteChildren {
   ConfigureRoute: typeof ConfigureRoute
   InteractRoute: typeof InteractRoute
   OutreachRoute: typeof OutreachRoute
+  ReplyRoute: typeof ReplyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reply': {
+      id: '/reply'
+      path: '/reply'
+      fullPath: '/reply'
+      preLoaderRoute: typeof ReplyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/outreach': {
       id: '/outreach'
       path: '/outreach'
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfigureRoute: ConfigureRoute,
   InteractRoute: InteractRoute,
   OutreachRoute: OutreachRoute,
+  ReplyRoute: ReplyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

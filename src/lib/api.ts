@@ -94,7 +94,7 @@ export async function enrichProfiles(
 
 // ── WebSocket URL ───────────────────────────────────────────────
 
-export const WS_URL = import.meta.env.VITE_WS_URL ?? "wss://ws.pawx.ai/ws"
+export const WS_URL = import.meta.env.VITE_WS_URL 
 
 // ── Fetch KOL profiles from real API, fallback to mock ──────────
 

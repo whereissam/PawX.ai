@@ -1,5 +1,8 @@
+import { useState, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Radio,
@@ -11,11 +14,19 @@ import {
   Quote,
   BarChart3,
   Check,
-  Clock,
-  Minus,
+  X,
+  Sparkles,
+  Send,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import type { WsMessage } from "@/hooks/use-websocket"
 import type { KolUser } from "@/types"
+import { useInteractionConfig } from "@/hooks/use-interaction-config"
+import { useAuth } from "@/hooks/use-auth"
+import { generateReply } from "@/lib/gemini"
+import { postTweet } from "@/lib/twitter-api"
 
 function formatNumber(n: number | null | undefined): string {
   if (n == null) return "0"
@@ -111,22 +122,71 @@ interface LiveTweetCardProps {
 
 export function LiveTweetCard({ message, selectedKols }: LiveTweetCardProps) {
   const tweet = parseTweetData(message, selectedKols)
+  const { config } = useInteractionConfig()
+  const { isTwitterConnected } = useAuth()
+
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isSending, setIsSending] = useState(false)
+  const [generatedReply, setGeneratedReply] = useState("")
+  const [editedReply, setEditedReply] = useState("")
+  const [sent, setSent] = useState(false)
+  const [skipped, setSkipped] = useState(false)
+  const [skipReason, setSkipReason] = useState<string>()
+  const [error, setError] = useState<string>()
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  const tweetId = message.tweetId
 
   const avatarSrc = tweet.avatarUrl
     ?? `https://api.dicebear.com/9.x/initials/svg?seed=${tweet.name}`
 
-  // Simulate reply status
-  const hash = message.id.charCodeAt(0) % 3
-  const replyStatus = hash === 0 ? "replied" : hash === 1 ? "pending" : "skipped"
+  const handleGenerate = useCallback(async () => {
+    setIsGenerating(true)
+    setError(undefined)
+    setSent(false)
+    setSkipped(false)
 
-  const statusConfig = {
-    replied: { label: "Replied", color: "bg-green-500/10 text-green-700", icon: Check },
-    pending: { label: "Pending", color: "bg-yellow-500/10 text-yellow-700", icon: Clock },
-    skipped: { label: "Skipped", color: "bg-muted text-muted-foreground", icon: Minus },
-  }
+    try {
+      const conditionPrompt =
+        config.replyCondition === "conditional" ? config.conditionPrompt : undefined
+      const result = await generateReply(
+        config.stylePrompt,
+        tweet.text,
+        tweet.screenName,
+        conditionPrompt
+      )
 
-  const status = statusConfig[replyStatus]
-  const StatusIcon = status.icon
+      setGeneratedReply(result.reply)
+      setEditedReply(result.reply)
+      setSkipped(!result.shouldReply)
+      setSkipReason(result.reason)
+      setIsExpanded(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate reply")
+    } finally {
+      setIsGenerating(false)
+    }
+  }, [config, tweet.text, tweet.screenName])
+
+  const handleSend = useCallback(async () => {
+    if (!editedReply?.trim() || !tweetId) return
+
+    setIsSending(true)
+    setError(undefined)
+
+    try {
+      const result = await postTweet(editedReply, tweetId)
+      if (!result.success) {
+        throw new Error(result.error || "Failed to post reply")
+      }
+      setSent(true)
+      setIsExpanded(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send reply")
+    } finally {
+      setIsSending(false)
+    }
+  }, [editedReply, tweetId])
 
   return (
     <Card className="border-l-4 border-l-primary/60 animate-in slide-in-from-top-2 duration-300">
@@ -184,30 +244,107 @@ export function LiveTweetCard({ message, selectedKols }: LiveTweetCardProps) {
           </span>
         </div>
 
-        {/* Reply status */}
-        <div className="flex items-center justify-between pt-1">
-          <Badge variant="secondary" className="text-xs gap-1">
-            <MessageSquare className="h-3 w-3" />
-            Auto-replying...
-          </Badge>
-          <Badge className={`text-xs gap-1 ${status.color}`}>
-            <StatusIcon className="h-3 w-3" />
-            {status.label}
-          </Badge>
+        {/* Reply actions */}
+        <div className="flex items-center gap-2 pt-1">
+          {sent ? (
+            <Badge className="bg-green-500/10 text-green-700 gap-1">
+              <Check className="h-3 w-3" />
+              Reply Sent
+            </Badge>
+          ) : skipped ? (
+            <Badge variant="secondary" className="gap-1">
+              <X className="h-3 w-3" />
+              Skipped: {skipReason}
+            </Badge>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs"
+                onClick={handleGenerate}
+                disabled={isGenerating || !config.stylePrompt}
+              >
+                {isGenerating ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" />
+                )}
+                {generatedReply ? "Regenerate" : "Generate Reply"}
+              </Button>
+
+              {generatedReply && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-xs"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                >
+                  {isExpanded ? (
+                    <ChevronUp className="h-3.5 w-3.5" />
+                  ) : (
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  )}
+                  {isExpanded ? "Collapse" : "Show Reply"}
+                </Button>
+              )}
+            </>
+          )}
         </div>
 
-        {replyStatus === "replied" && (
-          <div className="ml-4 p-2.5 bg-surface-2/50 rounded-md border-l-2 border-green-500/50">
-            <p className="text-xs text-muted-foreground">
-              Great point! The on-chain metrics confirm this trend.
-            </p>
+        {error && (
+          <p className="text-xs text-destructive">{error}</p>
+        )}
+
+        {/* Reply editor */}
+        {isExpanded && generatedReply && !sent && !skipped && (
+          <div className="ml-4 mt-2 space-y-2 border-l-2 border-primary/30 pl-3">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-3 w-3 text-primary" />
+              <span className="text-xs font-medium">Your Reply</span>
+              <span className="text-[10px] text-muted-foreground">
+                {editedReply.length}/280
+              </span>
+            </div>
+            <Textarea
+              value={editedReply}
+              onChange={(e) => setEditedReply(e.target.value)}
+              rows={2}
+              className="text-sm resize-none"
+            />
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                className="gap-1.5"
+                onClick={handleSend}
+                disabled={isSending || !editedReply?.trim() || !tweetId || !isTwitterConnected}
+              >
+                {isSending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Send className="h-3.5 w-3.5" />
+                )}
+                Send Reply
+              </Button>
+              {!isTwitterConnected && (
+                <span className="text-[10px] text-muted-foreground">
+                  Connect Twitter in Configure to send
+                </span>
+              )}
+              {!tweetId && isTwitterConnected && (
+                <span className="text-[10px] text-muted-foreground">
+                  No tweet ID available for reply
+                </span>
+              )}
+            </div>
           </div>
         )}
 
-        {replyStatus === "skipped" && (
-          <p className="text-xs text-muted-foreground ml-4">
-            Reason: Does not match reply conditions
-          </p>
+        {/* Show sent reply */}
+        {sent && editedReply && (
+          <div className="ml-4 p-2.5 bg-surface-2/50 rounded-md border-l-2 border-green-500/50">
+            <p className="text-xs text-muted-foreground">{editedReply}</p>
+          </div>
         )}
       </CardContent>
     </Card>

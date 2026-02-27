@@ -1,5 +1,5 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+// import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { MobileNav } from '@/components/mobile-nav'
 import { useAuth } from '@/hooks/use-auth'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -107,7 +107,7 @@ export const Route = createRootRoute({
         </div>
       </nav>
       <Outlet />
-      <TanStackRouterDevtools />
+      {/* <TanStackRouterDevtools /> */}
     </>
   ),
 })

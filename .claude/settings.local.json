@@ -1,13 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(bunx shadcn@latest add:*)",
-      "Bash(bun run build:*)",
-      "Bash(bunx @tanstack/router-cli generate:*)",
-      "Bash(bun add:*)",
-      "Bash(timeout 8 bun run:*)",
-      "WebFetch(domain:pawx-social-assistant.onrender.com)",
-      "Bash(ls:*)"
+      "Bash(wc:*)"
     ],
     "deny": []
   }
